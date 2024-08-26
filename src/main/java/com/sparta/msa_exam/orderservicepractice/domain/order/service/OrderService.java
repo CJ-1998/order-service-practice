@@ -13,6 +13,8 @@ import com.sparta.msa_exam.orderservicepractice.global.base.exception.ServiceExc
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,6 +61,21 @@ public class OrderService {
     @Transactional(readOnly = true)
     public List<Order> getOrdersByStatus(OrderStatus status) {
         return orderRepository.findAllByOrderStatus(status);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Order> getOrdersByUserId(UUID userId, Pageable pageable) {
+        return orderRepository.findAllByUserId(userId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Order> getAllOrders(Pageable pageable) {
+        return orderRepository.findAll(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Order> getOrdersByStatus(OrderStatus status, Pageable pageable) {
+        return orderRepository.findAllByOrderStatus(status, pageable);
     }
 
     @Transactional

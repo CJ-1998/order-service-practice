@@ -9,6 +9,8 @@ import com.sparta.msa_exam.orderservicepractice.global.base.exception.ServiceExc
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +39,16 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<Product> getProductsByStoreIdAndStatus(UUID storeId, ProductStatus status) {
         return productRepository.findAllByStoreIdAndStatus(storeId, status);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Product> getProductsByStoreId(UUID storeId, Pageable pageable) {
+        return productRepository.findAllByStoreId(storeId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Product> getProductsByStoreIdAndStatus(UUID storeId, ProductStatus status, Pageable pageable) {
+        return productRepository.findAllByStoreIdAndStatus(storeId, status, pageable);
     }
 
     @Transactional
