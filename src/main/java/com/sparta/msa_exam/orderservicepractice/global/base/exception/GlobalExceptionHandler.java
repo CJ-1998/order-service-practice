@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestValueException;
@@ -88,6 +89,13 @@ public class GlobalExceptionHandler {
         log.error("MethodArgumentTypeMismatchException : {}", e.getMessage());
         return ResponseEntity.badRequest()
                 .body(createFailureResponse(ErrorCode.INVALID_INPUT_VALUE));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class) // 권한이 없는 경우
+    public ResponseEntity<ResponseBody<Void>> handleAccessDeniedException(AccessDeniedException e) {
+        log.error("AccessDeniedException : {}", e.getMessage());
+        return ResponseEntity.status(ErrorCode.FORBIDDEN.getStatus())
+                .body(createFailureResponse(ErrorCode.FORBIDDEN, e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
