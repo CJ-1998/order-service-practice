@@ -1,11 +1,9 @@
 package com.sparta.msa_exam.orderservicepractice.domain.product.domain;
 
-import com.sparta.msa_exam.orderservicepractice.domain.order.domain.enums.OrderStatus;
 import com.sparta.msa_exam.orderservicepractice.domain.order_product.domain.OrderProduct;
 import com.sparta.msa_exam.orderservicepractice.domain.product.domain.enums.ProductStatus;
 import com.sparta.msa_exam.orderservicepractice.global.base.domain.BaseEntity;
 import jakarta.persistence.*;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

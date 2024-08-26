@@ -10,9 +10,7 @@ import com.sparta.msa_exam.orderservicepractice.global.base.dto.ResponseBody;
 import com.sparta.msa_exam.orderservicepractice.global.base.dto.ResponseUtil;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
