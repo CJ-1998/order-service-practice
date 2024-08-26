@@ -30,6 +30,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests((authorizeRequests) -> authorizeRequests
                         .requestMatchers("/api/**").permitAll() // 초기 설정
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll() // Swagger UI 접근 허용
                         .anyRequest().authenticated())
         ;
 
