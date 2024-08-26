@@ -39,3 +39,6 @@ src/.DS_Store
 src/main/.DS_Store
 postgres-data/**
 .DS_Store
+
+### properties
+application-ai.properties
