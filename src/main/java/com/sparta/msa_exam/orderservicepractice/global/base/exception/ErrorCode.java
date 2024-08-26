@@ -22,6 +22,19 @@ public enum ErrorCode {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "AUTH_0001", "인증에 실패하였습니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "AUTH_0002", "권한이 없습니다."),
 
+
+
+
+
+
+
+
+
+
+
+    // Region
+    REGION_ALREADY_EXISTS(HttpStatus.CONFLICT, "REGION_0001", "이미 존재하는 지역입니다."),
+    REGION_NOT_FOUND(HttpStatus.NOT_FOUND, "REGION_0002", "존재하지 않는 지역입니다."),
     ;
     private final HttpStatus status;
     private final String code;
