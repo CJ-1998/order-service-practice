@@ -36,7 +36,7 @@ public abstract class BaseEntity {
     private String updatedBy;
 
     @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+    protected LocalDateTime deletedAt;
 
-    private String deletedBy;
+    protected String deletedBy;
 }
