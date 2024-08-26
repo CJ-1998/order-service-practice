@@ -1,4 +1,4 @@
-package com.sparta.msa_exam.orderservicepractice.domain.ai;
+package com.sparta.msa_exam.orderservicepractice.domain.ai.domain;
 
 import com.sparta.msa_exam.orderservicepractice.global.base.domain.BaseEntity;
 import jakarta.persistence.Entity;
