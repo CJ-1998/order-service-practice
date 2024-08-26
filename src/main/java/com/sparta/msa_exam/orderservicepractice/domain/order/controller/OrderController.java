@@ -1,4 +1,4 @@
-package com.sparta.msa_exam.orderservicepractice.domain.order.domain.controller;
+package com.sparta.msa_exam.orderservicepractice.domain.order.controller;
 
 import com.sparta.msa_exam.orderservicepractice.domain.order.domain.Order;
 import com.sparta.msa_exam.orderservicepractice.domain.order.domain.dtos.OrderRequestDto;
