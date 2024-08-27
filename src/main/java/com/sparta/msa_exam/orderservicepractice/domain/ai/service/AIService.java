@@ -4,6 +4,11 @@ import com.sparta.msa_exam.orderservicepractice.domain.ai.domain.AI;
 import com.sparta.msa_exam.orderservicepractice.domain.ai.dto.ChatRequest;
 import com.sparta.msa_exam.orderservicepractice.domain.ai.dto.ChatResponse;
 import com.sparta.msa_exam.orderservicepractice.domain.ai.repository.AIRepository;
+import com.sparta.msa_exam.orderservicepractice.domain.user.domain.User;
+import com.sparta.msa_exam.orderservicepractice.domain.user.repository.UserRepository;
+import com.sparta.msa_exam.orderservicepractice.global.base.exception.ErrorCode;
+import com.sparta.msa_exam.orderservicepractice.global.base.exception.ServiceException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,6 +25,7 @@ public class AIService {
     private RestTemplate restTemplate;
 
     private final AIRepository aiRepository;
+    private final UserRepository userRepository;
 
     @Value("${gemini.api.url}")
     private String apiUrl;
@@ -42,5 +48,11 @@ public class AIService {
         aiRepository.save(AI.createAI(requestMessage, responseMessage));
 
         return responseMessage;
+    }
+
+    public List<AI> getMyAIRecord(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
+        return aiRepository.findAllByCreatedBy(user.getNickname());
     }
 }
