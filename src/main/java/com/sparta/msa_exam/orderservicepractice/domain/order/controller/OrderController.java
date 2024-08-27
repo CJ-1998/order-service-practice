@@ -1,4 +1,4 @@
-package com.sparta.msa_exam.orderservicepractice.domain.order.domain.controller;
+package com.sparta.msa_exam.orderservicepractice.domain.order.controller;
 
 import com.sparta.msa_exam.orderservicepractice.domain.order.domain.Order;
 import com.sparta.msa_exam.orderservicepractice.domain.order.domain.dtos.OrderRequestDto;
@@ -15,6 +15,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,28 +51,57 @@ public class OrderController {
     }
 
     @GetMapping // 전체 주문 조회
-    public ResponseEntity<ResponseBody<List<OrderResponseDto>>> getAllOrders(@RequestParam(required = false) OrderStatus status) {
+    public ResponseEntity<ResponseBody<Page<OrderResponseDto>>> getAllOrders(
+            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdDate") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDirection) {
 
-        List<Order> orders;
-        if (status != null) {
-            orders = orderService.getOrdersByStatus(status);
-        } else {
-            orders = orderService.getAllOrders();
+        // 페이지 크기 제한: 10, 30, 50 이외의 값은 10으로 고정
+        if (size != 10 && size != 30 && size != 50) {
+            size = 10;
         }
 
-        List<OrderResponseDto> responseDtos = orders.stream()
-                .map(orderMapper::toOrderResponseDto)
-                .collect(Collectors.toList());
+        // 정렬 방향 처리
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection.toUpperCase());
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        Page<Order> orderPage;
+
+        if (status != null) {
+            orderPage = orderService.getOrdersByStatus(status, pageable);
+        } else {
+            orderPage = orderService.getAllOrders(pageable);
+        }
+
+        Page<OrderResponseDto> responseDtos = orderPage.map(orderMapper::toOrderResponseDto);
 
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDtos));
     }
 
     @GetMapping("/{userId}") // 특정 유저의 주문 조회
-    public ResponseEntity<ResponseBody<List<OrderResponseDto>>> getOrdersByUserId(@PathVariable UUID userId) {
-        List<Order> orders = orderService.getOrdersByUserId(userId);
-        List<OrderResponseDto> responseDtos = orders.stream()
-                .map(orderMapper::toOrderResponseDto)
-                .collect(Collectors.toList());
+    public ResponseEntity<ResponseBody<Page<OrderResponseDto>>> getOrdersByUserId(
+            @PathVariable UUID userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdDate") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDirection) {
+
+        // 페이지 크기 제한: 10, 30, 50 이외의 값은 10으로 고정
+        if (size != 10 && size != 30 && size != 50) {
+            size = 10;
+        }
+
+        // 정렬 방향 처리
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection.toUpperCase());
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        Page<Order> orderPage = orderService.getOrdersByUserId(userId, pageable);
+
+        Page<OrderResponseDto> responseDtos = orderPage.map(orderMapper::toOrderResponseDto);
 
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDtos));
     }
