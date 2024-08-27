@@ -26,4 +26,11 @@ public class AI extends BaseEntity {
     private String request;
 
     private String response;
+
+    public static AI createAI(String request, String response) {
+        AI ai = new AI();
+        ai.request = request;
+        ai.response = response;
+        return ai;
+    }
 }
