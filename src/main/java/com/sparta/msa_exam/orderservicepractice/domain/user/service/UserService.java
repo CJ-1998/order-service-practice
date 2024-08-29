@@ -32,11 +32,14 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDto updateUser(Long userId, UserRequestDto userRequestDto) {
+    public UserResponseDto updateUser(Long userId, UserRequestDto userRequestDto, UserDetailsImpl userDetails)
+            throws AccessDeniedException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
 
-        checkUpdateUser(userRequestDto, user);
+        if (checkRole(userDetails, user)) {
+            checkUpdateUser(userRequestDto, user);
+        }
 
         return UserResponseDto.convertToUserResponseDto(user);
     }
@@ -90,12 +93,14 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
 
-        checkRoleAndDelete(userDetails, user);
+        if (checkRole(userDetails, user)) {
+            user.softDelete(userDetails.getUsername());
+        }
 
         return UserResponseDto.convertToUserResponseDto(user);
     }
 
-    private static void checkRoleAndDelete(UserDetailsImpl userDetails, User user) throws AccessDeniedException {
+    private static boolean checkRole(UserDetailsImpl userDetails, User user) throws AccessDeniedException {
         String deletedBy = userDetails.getUsername();
 
         boolean isAdmin = userDetails.getAuthorities().stream()
@@ -103,7 +108,7 @@ public class UserService {
 
         // 관리자는 누구나 삭제 가능하고, 관리자가 아니면 본인만 삭제 가능
         if (isAdmin || deletedBy.equals(user.getUsername())) {
-            user.softDelete(deletedBy);
+            return true;
         } else {
             throw new AccessDeniedException("삭제할 권한이 없습니다.");
         }

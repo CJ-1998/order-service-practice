@@ -35,8 +35,10 @@ public class UserController {
 
     @PutMapping("/{userId}")
     public ResponseEntity<ResponseBody<UserResponseDto>> updateUser(@PathVariable("userId") Long userId,
-                                                                    @RequestBody UserRequestDto userRequestDto) {
-        UserResponseDto userResponseDto = userService.updateUser(userId, userRequestDto);
+                                                                    @RequestBody UserRequestDto userRequestDto,
+                                                                    @AuthenticationPrincipal UserDetailsImpl userDetails)
+            throws AccessDeniedException {
+        UserResponseDto userResponseDto = userService.updateUser(userId, userRequestDto, userDetails);
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(userResponseDto));
     }
 
