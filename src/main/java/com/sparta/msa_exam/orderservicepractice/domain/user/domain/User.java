@@ -2,6 +2,7 @@ package com.sparta.msa_exam.orderservicepractice.domain.user.domain;
 
 import com.sparta.msa_exam.orderservicepractice.domain.region.domain.Region;
 import com.sparta.msa_exam.orderservicepractice.global.base.domain.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -25,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "users")
+@Table(name = "p_user")
 public class User extends BaseEntity {
 
     @Id
@@ -38,8 +39,8 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Size(min = 8, max = 15)
-    @Pattern(regexp = "^[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]+$")  // 알파벳 대소문자, 숫자, 특수문자로 구성
+    // @Size(min = 8, max = 15)
+    // @Pattern(regexp = "^[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]+$")  // 알파벳 대소문자, 숫자, 특수문자로 구성
     @Column(nullable = false)
     private String password;
 
@@ -51,7 +52,7 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String address;
 
-    @Size(min = 0, max = 50)
+    @Size(max = 50)
     @Column(nullable = false)
     private String request;
 
@@ -59,7 +60,7 @@ public class User extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private UserRole role;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "region_id")
     private Region region;
 

@@ -5,6 +5,7 @@ import com.sparta.msa_exam.orderservicepractice.domain.user.domain.User;
 import com.sparta.msa_exam.orderservicepractice.domain.user.domain.UserRole;
 import com.sparta.msa_exam.orderservicepractice.domain.user.dto.AuthRequestDto;
 import com.sparta.msa_exam.orderservicepractice.domain.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public void signup(AuthRequestDto authRequestDto) {
         String username = authRequestDto.getUsername();
         String password = passwordEncoder.encode(authRequestDto.getPassword());
