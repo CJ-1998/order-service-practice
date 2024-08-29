@@ -13,6 +13,8 @@ import java.nio.file.AccessDeniedException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -112,5 +114,14 @@ public class UserService {
         } else {
             throw new AccessDeniedException("삭제할 권한이 없습니다.");
         }
+    }
+
+    public Page<UserResponseDto> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable).map(UserResponseDto::convertToUserResponseDto);
+    }
+
+    public Page<UserResponseDto> searchUsersByUsername(String username, Pageable pageable) {
+        return userRepository.findByUsernameContaining(username, pageable)
+                .map(UserResponseDto::convertToUserResponseDto);
     }
 }
