@@ -75,4 +75,28 @@ public class User extends BaseEntity {
         this.region = region;
     }
 
+
+    public void updateUsername(String username) {
+        this.username = username;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updateAddress(String address) {
+        this.address = address;
+    }
+
+    public void updateRequest(String request) {
+        this.request = request;
+    }
+
+    public void updateRegionName(String regionName) {
+        this.region.updateName(regionName);
+    }
 }
