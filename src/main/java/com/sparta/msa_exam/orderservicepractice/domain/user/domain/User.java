@@ -63,12 +63,15 @@ public class User extends BaseEntity {
     @JoinColumn(name = "region_id")
     private Region region;
 
-    public User(String username, String password, String nickname, String address, String request, UserRole role) {
+    public User(String username, String password, String nickname, String address,
+                String request, UserRole role, Region region) {
         this.username = username;
         this.password = password;
         this.nickname = nickname;
         this.address = address;
         this.request = request;
         this.role = role;
+        this.region = region;
     }
+
 }
