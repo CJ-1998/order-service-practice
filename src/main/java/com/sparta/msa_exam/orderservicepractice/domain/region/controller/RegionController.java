@@ -4,10 +4,14 @@ import com.sparta.msa_exam.orderservicepractice.domain.region.domain.dto.request
 import com.sparta.msa_exam.orderservicepractice.domain.region.domain.dto.request.UpdateRegionRequest;
 import com.sparta.msa_exam.orderservicepractice.domain.region.domain.dto.response.RegionInfo;
 import com.sparta.msa_exam.orderservicepractice.domain.region.service.RegionService;
+import com.sparta.msa_exam.orderservicepractice.domain.user.domain.UserRole;
+import com.sparta.msa_exam.orderservicepractice.domain.user.security.UserDetailsImpl;
 import com.sparta.msa_exam.orderservicepractice.global.base.dto.ResponseBody;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,10 +26,11 @@ public class RegionController {
 
     private final RegionService regionService;
 
+    @Secured(UserRole.Authority.ADMIN)
     @PostMapping
-    public ResponseEntity<ResponseBody<Void>> createRegion(@RequestBody @Valid CreateRegionRequest request) {
-        Long userId = 1L; // TODO. 수정
-        regionService.createRegion(userId, request);
+    public ResponseEntity<ResponseBody<Void>> createRegion(@RequestBody @Valid CreateRegionRequest request,
+                                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        regionService.createRegion(userDetails.getUser().getId(), request);
         return ResponseEntity.ok(createSuccessResponse());
     }
 
@@ -34,18 +39,20 @@ public class RegionController {
         return ResponseEntity.ok(createSuccessResponse(regionService.getRegions()));
     }
 
+    @Secured(UserRole.Authority.ADMIN)
     @PutMapping("/{regionId}")
     public ResponseEntity<ResponseBody<Void>> updateRegion(@PathVariable UUID regionId,
-                                                           @RequestBody @Valid UpdateRegionRequest request) {
-        Long userId = 1L; // TODO. 수정
-        regionService.updateRegion(userId, regionId, request);
+                                                           @RequestBody @Valid UpdateRegionRequest request,
+                                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        regionService.updateRegion(userDetails.getUser().getId(), regionId, request);
         return ResponseEntity.ok(createSuccessResponse());
     }
 
+    @Secured(UserRole.Authority.ADMIN)
     @DeleteMapping("/{regionId}")
-    public ResponseEntity<ResponseBody<Void>> deleteRegion(@PathVariable UUID regionId) {
-        Long userId = 1L; // TODO. 수정
-        regionService.deleteRegion(userId, regionId);
+    public ResponseEntity<ResponseBody<Void>> deleteRegion(@PathVariable UUID regionId,
+                                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        regionService.deleteRegion(userDetails.getUser().getId(), regionId);
         return ResponseEntity.ok(createSuccessResponse());
     }
 }
