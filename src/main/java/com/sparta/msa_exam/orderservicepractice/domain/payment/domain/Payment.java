@@ -72,5 +72,6 @@ public class Payment extends BaseEntity {
     public void softDelete(String deleteBy) {
         this.deletedBy = deletedBy;
         this.deletedAt = LocalDateTime.now();
+        this.paymentStatus = PaymentStatus.REFUNDED;
     }
 }
