@@ -1,10 +1,13 @@
 package com.sparta.msa_exam.orderservicepractice.domain.user.service;
 
 import com.sparta.msa_exam.orderservicepractice.domain.region.domain.Region;
+import com.sparta.msa_exam.orderservicepractice.domain.region.repository.RegionRepository;
 import com.sparta.msa_exam.orderservicepractice.domain.user.domain.User;
 import com.sparta.msa_exam.orderservicepractice.domain.user.domain.UserRole;
 import com.sparta.msa_exam.orderservicepractice.domain.user.dto.AuthRequestDto;
 import com.sparta.msa_exam.orderservicepractice.domain.user.repository.UserRepository;
+import com.sparta.msa_exam.orderservicepractice.global.base.exception.ErrorCode;
+import com.sparta.msa_exam.orderservicepractice.global.base.exception.ServiceException;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final RegionRepository regionRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -28,14 +32,20 @@ public class AuthService {
         String address = authRequestDto.getAddress();
         String request = authRequestDto.getRequest();
         UserRole role = authRequestDto.getRole();
-        Region region = new Region(authRequestDto.getRegionName());
+        Region region = findRegion(authRequestDto.getRegionName());
 
         checkUsername(username);
         checkNickname(nickname);
 
         // 사용자 등록
         User user = new User(username, password, nickname, address, request, role, region);
+
         userRepository.save(user);
+    }
+
+    private Region findRegion(String regionName) {
+        return regionRepository.findByName(regionName)
+                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
     }
 
     private void checkUsername(String username) {
