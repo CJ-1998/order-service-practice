@@ -32,10 +32,7 @@ public class ProductController {
             @RequestBody @Valid ProductRequestDto productRequestDto,
             @PathVariable UUID storeId) {
 
-        Product product = productMapper.toProduct(productRequestDto);
-        product.updateStoreId(storeId);
-
-        Product createdProduct = productService.createProduct(product);
+        Product createdProduct = productService.createProduct(productRequestDto, storeId);
         ProductResponseDto responseDto = productMapper.toProductResponseDto(createdProduct);
 
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDto));

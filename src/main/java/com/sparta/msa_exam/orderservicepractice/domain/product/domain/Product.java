@@ -2,6 +2,7 @@ package com.sparta.msa_exam.orderservicepractice.domain.product.domain;
 
 import com.sparta.msa_exam.orderservicepractice.domain.order_product.domain.OrderProduct;
 import com.sparta.msa_exam.orderservicepractice.domain.product.domain.enums.ProductStatus;
+import com.sparta.msa_exam.orderservicepractice.domain.store.domain.Store;
 import com.sparta.msa_exam.orderservicepractice.global.base.domain.BaseEntity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -40,22 +41,20 @@ public class Product extends BaseEntity {
     @Column(name = "status", nullable = false)
     private ProductStatus status;
 
-    @Column(name = "store_id", nullable = false)
-    private UUID storeId;
+    @ManyToOne(cascade = CascadeType.PERSIST,fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id", nullable = false)
+    private Store store;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderProduct> orderProducts = new ArrayList<>();
 
     @Builder
-    public Product(String name, String description, Integer price) {
+    public Product(String name, String description, Integer price, Store store) {
         this.name = name;
         this.description = description;
         this.price = price;
         this.status = ProductStatus.ACTIVE;
-    }
-
-    public void updateStoreId(UUID storeId) {
-        this.storeId = storeId;
+        this.store = store;
     }
 
     public void updateDetails(Product updatedProduct) {
@@ -63,7 +62,6 @@ public class Product extends BaseEntity {
         this.description = updatedProduct.getDescription();
         this.price = updatedProduct.getPrice();
         this.status = updatedProduct.getStatus();
-        this.storeId = updatedProduct.getStoreId();
     }
 
     public void hide() {
