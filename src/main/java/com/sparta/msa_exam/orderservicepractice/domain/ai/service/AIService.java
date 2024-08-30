@@ -1,14 +1,17 @@
 package com.sparta.msa_exam.orderservicepractice.domain.ai.service;
 
 import com.sparta.msa_exam.orderservicepractice.domain.ai.domain.AI;
+import com.sparta.msa_exam.orderservicepractice.domain.ai.dto.AIRecordDto;
 import com.sparta.msa_exam.orderservicepractice.domain.ai.dto.ChatRequest;
 import com.sparta.msa_exam.orderservicepractice.domain.ai.dto.ChatResponse;
 import com.sparta.msa_exam.orderservicepractice.domain.ai.repository.AIRepository;
 import com.sparta.msa_exam.orderservicepractice.domain.user.domain.User;
 import com.sparta.msa_exam.orderservicepractice.domain.user.repository.UserRepository;
+import com.sparta.msa_exam.orderservicepractice.domain.user.security.UserDetailsImpl;
 import com.sparta.msa_exam.orderservicepractice.global.base.exception.ErrorCode;
 import com.sparta.msa_exam.orderservicepractice.global.base.exception.ServiceException;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -54,5 +57,14 @@ public class AIService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
         return aiRepository.findAllByCreatedBy(user.getNickname());
+    }
+
+    public AIRecordDto deleteAIRequest(UserDetailsImpl userDetails, UUID requestId) {
+        AI ai = aiRepository.findById(requestId)
+                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
+
+        ai.softDelete(userDetails.getUsername());
+
+        return AIRecordDto.convertToAIRecordDto(ai);
     }
 }
