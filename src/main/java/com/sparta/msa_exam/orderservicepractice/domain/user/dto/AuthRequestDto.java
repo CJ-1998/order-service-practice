@@ -1,6 +1,5 @@
 package com.sparta.msa_exam.orderservicepractice.domain.user.dto;
 
-import com.sparta.msa_exam.orderservicepractice.domain.region.domain.Region;
 import com.sparta.msa_exam.orderservicepractice.domain.user.domain.UserRole;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -25,5 +24,5 @@ public class AuthRequestDto {
     @Size(max = 50)
     private String request;
     private UserRole role;
-    private Region region;
+    private String regionName;
 }
