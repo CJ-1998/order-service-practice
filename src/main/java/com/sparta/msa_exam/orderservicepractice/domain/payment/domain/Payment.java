@@ -68,4 +68,9 @@ public class Payment extends BaseEntity {
         this.transactionId = transactionId;
         this.paymentStatus = PaymentStatus.PAID;
     }
+
+    public void softDelete(String deleteBy) {
+        this.deletedBy = deletedBy;
+        this.deletedAt = LocalDateTime.now();
+    }
 }
