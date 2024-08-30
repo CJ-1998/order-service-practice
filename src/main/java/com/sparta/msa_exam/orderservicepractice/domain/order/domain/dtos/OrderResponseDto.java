@@ -17,7 +17,7 @@ public class OrderResponseDto {
     private PaymentStatus paymentStatus;
     private OrderCategory orderCategory;
     private OrderStatus orderStatus;
-    private UUID userId;
+    private Long userId;
     private UUID storeId;
     private List<OrderProductResponseDto> products;
 

@@ -13,7 +13,6 @@ public class JpaConfig {
 
     @Bean
     public AuditorAware<String> auditorProvider() {
-        // TODO. SecurityContext 에서 꺼내온 Authentication 에서 nickname 추출
-        return () -> Optional.of("닉네임");
+        return new AuditAwareImpl();
     }
 }

@@ -33,7 +33,7 @@ public class ProductMapper {
                 .description(product.getDescription())
                 .price(product.getPrice())
                 .status(product.getStatus())
-                .storeId(product.getStoreId())
+                .store(product.getStore())
                 .build();
     }
 }

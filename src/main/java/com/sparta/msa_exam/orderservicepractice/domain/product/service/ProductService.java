@@ -1,8 +1,11 @@
 package com.sparta.msa_exam.orderservicepractice.domain.product.service;
 
 import com.sparta.msa_exam.orderservicepractice.domain.product.domain.Product;
+import com.sparta.msa_exam.orderservicepractice.domain.product.domain.dtos.ProductRequestDto;
 import com.sparta.msa_exam.orderservicepractice.domain.product.domain.enums.ProductStatus;
 import com.sparta.msa_exam.orderservicepractice.domain.product.repository.ProductRepository;
+import com.sparta.msa_exam.orderservicepractice.domain.store.domain.Store;
+import com.sparta.msa_exam.orderservicepractice.domain.store.repository.StoreRepository;
 import com.sparta.msa_exam.orderservicepractice.global.base.exception.ErrorCode;
 import com.sparta.msa_exam.orderservicepractice.global.base.exception.ServiceException;
 
@@ -19,9 +22,20 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final StoreRepository storeRepository;
 
     @Transactional
-    public Product createProduct(Product product) {
+    public Product createProduct(ProductRequestDto productRequestDto, UUID storeId) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
+
+        Product product = Product.builder()
+                .name(productRequestDto.getName())
+                .description(productRequestDto.getDescription())
+                .price(productRequestDto.getPrice())
+                .store(store)
+                .build();
+
         return productRepository.save(product);
     }
 

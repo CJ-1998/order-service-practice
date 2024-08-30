@@ -1,6 +1,7 @@
 package com.sparta.msa_exam.orderservicepractice.domain.order.service;
 
 import com.sparta.msa_exam.orderservicepractice.domain.order.domain.Order;
+import com.sparta.msa_exam.orderservicepractice.domain.order.domain.dtos.OrderRequestDto;
 import com.sparta.msa_exam.orderservicepractice.domain.order.domain.enums.OrderStatus;
 import com.sparta.msa_exam.orderservicepractice.domain.order.repository.OrderRepository;
 import com.sparta.msa_exam.orderservicepractice.domain.order_product.domain.OrderProduct;
@@ -8,6 +9,10 @@ import com.sparta.msa_exam.orderservicepractice.domain.order_product.domain.dtos
 import com.sparta.msa_exam.orderservicepractice.domain.order_product.repository.OrderProductRepository;
 import com.sparta.msa_exam.orderservicepractice.domain.product.domain.Product;
 import com.sparta.msa_exam.orderservicepractice.domain.product.repository.ProductRepository;
+import com.sparta.msa_exam.orderservicepractice.domain.store.domain.Store;
+import com.sparta.msa_exam.orderservicepractice.domain.store.repository.StoreRepository;
+import com.sparta.msa_exam.orderservicepractice.domain.user.domain.User;
+import com.sparta.msa_exam.orderservicepractice.domain.user.repository.UserRepository;
 import com.sparta.msa_exam.orderservicepractice.global.base.exception.ErrorCode;
 import com.sparta.msa_exam.orderservicepractice.global.base.exception.ServiceException;
 import java.util.List;
@@ -25,22 +30,45 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final OrderProductRepository orderProductRepository;
+    private final UserRepository userRepository;
+    private final StoreRepository storeRepository;
 
     @Transactional
-    public Order createOrder(Order order, List<OrderProductRequestDto> products) {
+    public Order createOrder(OrderRequestDto orderDto, List<OrderProductRequestDto> products) {
+        User user = userRepository.findById(orderDto.getUserId())
+                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
+        Store store = storeRepository.findById(orderDto.getStoreId())
+                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
+
+        Order order = Order.builder()
+                .totalPrice(orderDto.getTotalPrice())
+                .orderAddress(orderDto.getOrderAddress())
+                .orderRequest(orderDto.getOrderRequest())
+                .orderCategory(orderDto.getOrderCategory())
+                .orderStatus(OrderStatus.PENDING)
+                .user(user)
+                .store(store)
+                .build();
+
         Order createdOrder = orderRepository.save(order);
 
         for (OrderProductRequestDto productDto : products) {
             Product product = productRepository.findById(productDto.getProductId())
                     .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
 
-            OrderProduct orderProduct = new OrderProduct(createdOrder, product, productDto.getQuantity());
+            OrderProduct orderProduct = OrderProduct.builder()
+                    .order(createdOrder)
+                    .product(product)
+                    .quantity(productDto.getQuantity())
+                    .build();
+
             orderProductRepository.save(orderProduct);
             createdOrder.addOrderProduct(orderProduct);
         }
 
         return createdOrder;
     }
+
 
     @Transactional(readOnly = true)
     public Order getOrderById(UUID orderId) {
@@ -49,7 +77,7 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<Order> getOrdersByUserId(UUID userId) {
+    public List<Order> getOrdersByUserId(Long userId) {
         return orderRepository.findAllByUserId(userId);
     }
 
@@ -64,7 +92,7 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Order> getOrdersByUserId(UUID userId, Pageable pageable) {
+    public Page<Order> getOrdersByUserId(Long userId, Pageable pageable) {
         return orderRepository.findAllByUserId(userId, pageable);
     }
 
