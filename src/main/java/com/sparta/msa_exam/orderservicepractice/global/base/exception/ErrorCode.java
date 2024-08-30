@@ -10,7 +10,7 @@ public enum ErrorCode {
     // Common
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "COMMON_0001", "잘못된 입력 값입니다."),
     INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "COMMON_0002", "잘못된 타입입니다."),
-    MISSING_INPUT_VALUE(HttpStatus.BAD_REQUEST,"COMMON_0003", "인자가 부족합니다."),
+    MISSING_INPUT_VALUE(HttpStatus.BAD_REQUEST, "COMMON_0003", "인자가 부족합니다."),
     NOT_EXIST_API(HttpStatus.BAD_REQUEST, "COMMON_0004", "요청 주소가 올바르지 않습니다."),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "COMMON_0005", "사용할 수 없는 메서드입니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON_0006", "서버 에러입니다."),
@@ -23,18 +23,12 @@ public enum ErrorCode {
     FORBIDDEN(HttpStatus.FORBIDDEN, "AUTH_0002", "권한이 없습니다."),
 
 
-
-
-
-
-
-
-
-
-
     // Region
     REGION_ALREADY_EXISTS(HttpStatus.CONFLICT, "REGION_0001", "이미 존재하는 지역입니다."),
     REGION_NOT_FOUND(HttpStatus.NOT_FOUND, "REGION_0002", "존재하지 않는 지역입니다."),
+
+    // Payment
+    PAYMENT_REFUND_FAILED(HttpStatus.CONFLICT, "PAYMENT_0001", "결제 취소에 실패했습니다."),
     ;
     private final HttpStatus status;
     private final String code;

@@ -47,10 +47,20 @@ public class PaymentService {
                 .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
 
         if (checkRole(userDetails, payment.getUser())) {
-            payment.softDelete(userDetails.getUsername());
+            if (PGRefundRequest(payment.getTransactionId())) {
+                payment.softDelete(userDetails.getUsername());
+            } else {
+
+                throw new ServiceException(ErrorCode.PAYMENT_REFUND_FAILED);
+            }
         }
 
         return PaymentResponseDto.convertToPaymentResponseDto(payment);
+    }
+
+    private boolean PGRefundRequest(UUID transactionId) {
+        // PG사에서 transactionId로 찾아서 결제 취소하는 로직
+        return true;
     }
 
     private static boolean checkRole(UserDetailsImpl userDetails, User user) throws AccessDeniedException {
