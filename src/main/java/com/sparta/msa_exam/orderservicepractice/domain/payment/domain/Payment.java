@@ -15,7 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -38,7 +38,7 @@ public class Payment extends BaseEntity {
     private int paymentAmount;
 
     @Column(name = "payment_at", nullable = false)
-    private LocalDate paymentAt;
+    private LocalDateTime paymentAt;
 
     @Column(name = "transaction_id", nullable = false)
     private UUID transactionId;
@@ -50,4 +50,22 @@ public class Payment extends BaseEntity {
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public Payment(int paymentAmount, LocalDateTime paymentAt, UUID transactionId, PaymentStatus paymentStatus,
+                   User user) {
+        this.paymentAmount = paymentAmount;
+        this.paymentAt = paymentAt;
+        this.transactionId = transactionId;
+        this.paymentStatus = paymentStatus;
+        this.user = user;
+    }
+
+    public static Payment createPayment(User user, int paymentAmount) {
+        return new Payment(paymentAmount, LocalDateTime.now(), null, PaymentStatus.PENDING, user);
+    }
+
+    public void successPayment(UUID transactionId) {
+        this.transactionId = transactionId;
+        this.paymentStatus = PaymentStatus.PAID;
+    }
 }
