@@ -28,7 +28,7 @@ public class AuthService {
         String address = authRequestDto.getAddress();
         String request = authRequestDto.getRequest();
         UserRole role = authRequestDto.getRole();
-        Region region = authRequestDto.getRegion();
+        Region region = new Region(authRequestDto.getRegionName());
 
         checkUsername(username);
         checkNickname(nickname);

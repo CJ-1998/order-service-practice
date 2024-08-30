@@ -71,6 +71,14 @@ public class JwtUtil {
             Cookie cookie = new Cookie(AUTHORIZATION_HEADER, token); // Name-Value
             cookie.setPath("/");
 
+            // SameSite=None 설정 및 Secure 설정
+            cookie.setSecure(true);  // HTTPS 환경에서만 쿠키 전송
+            cookie.setHttpOnly(true);  // 자바스크립트에서 쿠키 접근 차단
+            cookie.setMaxAge((int) TOKEN_TIME / 1000);  // 쿠키의 만료 시간 설정 (초 단위)
+
+            // SameSite 설정은 HttpServletResponse에 직접 설정해야 함
+            cookie.setAttribute("SameSite", "None"); // SameSite=None 설정
+
             // Response 객체에 Cookie 추가
             res.addCookie(cookie);
 
