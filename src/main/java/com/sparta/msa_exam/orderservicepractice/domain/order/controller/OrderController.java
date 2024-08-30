@@ -34,9 +34,9 @@ public class OrderController {
     public ResponseEntity<ResponseBody<OrderResponseDto>> createOrder(
             @RequestBody @Valid OrderRequestDto orderRequestDto) {
 
-        Order order = orderMapper.toOrder(orderRequestDto);
         List<OrderProductRequestDto> products = orderRequestDto.getProducts();
-        Order createdOrder = orderService.createOrder(order, products);
+        Order createdOrder = orderService.createOrder(orderRequestDto, products);
+
         OrderResponseDto responseDto = orderMapper.toOrderResponseDto(createdOrder);
 
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDto));
@@ -83,7 +83,7 @@ public class OrderController {
 
     @GetMapping("/{userId}") // 특정 유저의 주문 조회
     public ResponseEntity<ResponseBody<Page<OrderResponseDto>>> getOrdersByUserId(
-            @PathVariable UUID userId,
+            @PathVariable Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdDate") String sortBy,

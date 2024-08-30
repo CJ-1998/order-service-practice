@@ -4,6 +4,8 @@ import com.sparta.msa_exam.orderservicepractice.domain.order.domain.enums.OrderC
 import com.sparta.msa_exam.orderservicepractice.domain.order.domain.enums.OrderStatus;
 import com.sparta.msa_exam.orderservicepractice.domain.order_product.domain.OrderProduct;
 import com.sparta.msa_exam.orderservicepractice.domain.payment.domain.enums.PaymentStatus;
+import com.sparta.msa_exam.orderservicepractice.domain.store.domain.Store;
+import com.sparta.msa_exam.orderservicepractice.domain.user.domain.User;
 import com.sparta.msa_exam.orderservicepractice.global.base.domain.BaseEntity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -50,38 +52,31 @@ public class Order extends BaseEntity {
     @Column(name = "order_category", nullable = false)
     private OrderCategory orderCategory;
 
-    @Column(name = "user_id", nullable = false)
-    private UUID userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
+    private User user;
 
-    @Column(name = "store_id", nullable = false)
-    private UUID storeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id", nullable = false)
+    private Store store;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderProduct> orderProducts = new ArrayList<>();
 
     @Builder
-    public Order(UUID id, int totalPrice, String orderAddress, String orderRequest, PaymentStatus paymentStatus,
-                 OrderCategory orderCategory, OrderStatus orderStatus, UUID userId, UUID storeId, List<OrderProduct> orderProducts) {
-        this.id = id;
+    private Order(Integer totalPrice, String orderAddress, String orderRequest,
+                  OrderCategory orderCategory, OrderStatus orderStatus, User user, Store store, List<OrderProduct> orderProducts) {
         this.totalPrice = totalPrice;
         this.orderAddress = orderAddress;
         this.orderRequest = orderRequest;
-        this.paymentStatus = paymentStatus;
+        this.paymentStatus = PaymentStatus.PENDING;
         this.orderCategory = orderCategory;
         this.orderStatus = orderStatus;
-        this.userId = userId;
-        this.storeId = storeId;
+        this.user = user;
+        this.store = store;
         if (orderProducts != null) {
             this.orderProducts = orderProducts;
         }
-    }
-
-    public void updateUserId(UUID userId) {
-        this.userId = userId;
-    }
-
-    public void updateStoreId(UUID storeId) {
-        this.storeId = storeId;
     }
 
     public void updateDetails(Order updatedOrder) {
@@ -91,6 +86,8 @@ public class Order extends BaseEntity {
         this.paymentStatus = updatedOrder.getPaymentStatus();
         this.orderCategory = updatedOrder.getOrderCategory();
         this.orderStatus = updatedOrder.getOrderStatus();
+        this.user = updatedOrder.getUser();
+        this.store = updatedOrder.getStore();
     }
 
     public void updateTotalPrice() {
@@ -128,7 +125,7 @@ public class Order extends BaseEntity {
 
     public void removeOrderProduct(OrderProduct orderProduct) {
         if (orderProducts.remove(orderProduct)) {
-            orderProduct.setOrder(null); // Unlink the OrderProduct from this Order
+            orderProduct.setOrder(null);
         }
     }
 }

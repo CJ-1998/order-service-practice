@@ -78,8 +78,8 @@ public class OrderMapper {
                 .orderRequest(order.getOrderRequest())
                 .paymentStatus(order.getPaymentStatus())
                 .orderCategory(order.getOrderCategory())
-                .userId(order.getUserId())
-                .storeId(order.getStoreId())
+                .userId(order.getUser().getId())
+                .storeId(order.getStore().getId())
                 .products(productDtos)
                 .build();
     }
