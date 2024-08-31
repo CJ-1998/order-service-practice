@@ -7,19 +7,22 @@ import com.sparta.msa_exam.orderservicepractice.domain.order.domain.enums.OrderS
 import com.sparta.msa_exam.orderservicepractice.domain.order.domain.mapper.OrderMapper;
 import com.sparta.msa_exam.orderservicepractice.domain.order.service.OrderService;
 import com.sparta.msa_exam.orderservicepractice.domain.order_product.domain.dtos.OrderProductRequestDto;
+import com.sparta.msa_exam.orderservicepractice.domain.user.domain.UserRole;
+import com.sparta.msa_exam.orderservicepractice.domain.user.security.UserDetailsImpl;
 import com.sparta.msa_exam.orderservicepractice.global.base.dto.ResponseBody;
 import com.sparta.msa_exam.orderservicepractice.global.base.dto.ResponseUtil;
 
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,10 +35,11 @@ public class OrderController {
 
     @PostMapping // 주문 생성
     public ResponseEntity<ResponseBody<OrderResponseDto>> createOrder(
-            @RequestBody @Valid OrderRequestDto orderRequestDto) {
+            @RequestBody @Valid OrderRequestDto orderRequestDto,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         List<OrderProductRequestDto> products = orderRequestDto.getProducts();
-        Order createdOrder = orderService.createOrder(orderRequestDto, products);
+        Order createdOrder = orderService.createOrder(orderRequestDto, products, userDetails);
 
         OrderResponseDto responseDto = orderMapper.toOrderResponseDto(createdOrder);
 
@@ -50,6 +54,7 @@ public class OrderController {
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDto));
     }
 
+    @Secured({UserRole.Authority.ADMIN, UserRole.Authority.OWNER})
     @GetMapping // 전체 주문 조회
     public ResponseEntity<ResponseBody<Page<OrderResponseDto>>> getAllOrders(
             @RequestParam(required = false) OrderStatus status,
@@ -127,6 +132,7 @@ public class OrderController {
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDto));
     }
 
+    @Secured({UserRole.Authority.ADMIN})
     @DeleteMapping("/{orderId}") // 주문 삭제
     public ResponseEntity<ResponseBody<OrderResponseDto>> deleteOrder(@PathVariable UUID orderId) {
         Order deletedOrder = orderService.deleteOrder(orderId);

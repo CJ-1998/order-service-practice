@@ -13,6 +13,7 @@ import com.sparta.msa_exam.orderservicepractice.domain.store.domain.Store;
 import com.sparta.msa_exam.orderservicepractice.domain.store.repository.StoreRepository;
 import com.sparta.msa_exam.orderservicepractice.domain.user.domain.User;
 import com.sparta.msa_exam.orderservicepractice.domain.user.repository.UserRepository;
+import com.sparta.msa_exam.orderservicepractice.domain.user.security.UserDetailsImpl;
 import com.sparta.msa_exam.orderservicepractice.global.base.exception.ErrorCode;
 import com.sparta.msa_exam.orderservicepractice.global.base.exception.ServiceException;
 import java.util.List;
@@ -34,8 +35,9 @@ public class OrderService {
     private final StoreRepository storeRepository;
 
     @Transactional
-    public Order createOrder(OrderRequestDto orderDto, List<OrderProductRequestDto> products) {
-        User user = userRepository.findById(orderDto.getUserId())
+    public Order createOrder(OrderRequestDto orderDto, List<OrderProductRequestDto> products, UserDetailsImpl userDetails) {
+
+        User user = userRepository.findById(userDetails.getUser().getId())
                 .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
         Store store = storeRepository.findById(orderDto.getStoreId())
                 .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));

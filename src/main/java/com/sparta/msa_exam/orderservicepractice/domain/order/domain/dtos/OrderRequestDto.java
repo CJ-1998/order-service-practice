@@ -9,7 +9,6 @@ import lombok.Getter;
 @Getter
 public class OrderRequestDto {
     private int totalPrice;
-    private Long userId;
     private UUID storeId;
     private String orderAddress;
     private String orderRequest;

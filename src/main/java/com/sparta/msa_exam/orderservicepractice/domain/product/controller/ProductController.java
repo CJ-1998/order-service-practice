@@ -6,6 +6,7 @@ import com.sparta.msa_exam.orderservicepractice.domain.product.domain.dtos.Produ
 import com.sparta.msa_exam.orderservicepractice.domain.product.domain.enums.ProductStatus;
 import com.sparta.msa_exam.orderservicepractice.domain.product.domain.mapper.ProductMapper;
 import com.sparta.msa_exam.orderservicepractice.domain.product.service.ProductService;
+import com.sparta.msa_exam.orderservicepractice.domain.user.domain.UserRole;
 import com.sparta.msa_exam.orderservicepractice.global.base.dto.ResponseBody;
 import com.sparta.msa_exam.orderservicepractice.global.base.dto.ResponseUtil;
 
@@ -17,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,6 +29,7 @@ public class ProductController {
     private final ProductService productService;
     private final ProductMapper productMapper;
 
+    @Secured({UserRole.Authority.ADMIN, UserRole.Authority.OWNER})
     @PostMapping("/{storeId}") // store 에 product 등록
     public ResponseEntity<ResponseBody<ProductResponseDto>> createProduct(
             @RequestBody @Valid ProductRequestDto productRequestDto,
@@ -78,6 +81,7 @@ public class ProductController {
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDtos));
     }
 
+    @Secured({UserRole.Authority.ADMIN, UserRole.Authority.OWNER})
     @PutMapping("/{productId}") // product 수정
     public ResponseEntity<ResponseBody<ProductResponseDto>> updateProduct(
             @PathVariable UUID productId,
@@ -90,6 +94,7 @@ public class ProductController {
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDto));
     }
 
+    @Secured({UserRole.Authority.ADMIN, UserRole.Authority.OWNER})
     @PatchMapping("/{productId}/hide") // product 숨김
     public ResponseEntity<ResponseBody<ProductResponseDto>> hideProduct(@PathVariable UUID productId) {
         Product hiddenProduct = productService.hideProduct(productId);
@@ -98,6 +103,7 @@ public class ProductController {
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDto));
     }
 
+    @Secured({UserRole.Authority.ADMIN, UserRole.Authority.OWNER})
     @DeleteMapping("/{productId}") // product 삭제
     public ResponseEntity<ResponseBody<ProductResponseDto>> deleteProduct(@PathVariable UUID productId) {
         Product deletedProduct = productService.deleteProduct(productId);
