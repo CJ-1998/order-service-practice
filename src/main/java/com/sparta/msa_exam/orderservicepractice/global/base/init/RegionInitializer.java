@@ -6,9 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.List;
-
 @RequiredArgsConstructor
 @Component
 public class RegionInitializer implements CommandLineRunner {
@@ -17,14 +14,8 @@ public class RegionInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        List<Region> regions = Arrays.asList(
-                new Region("서울"),
-                new Region("경기도"),
-                new Region("대구")
-        );
-
         if (regionRepository.count() == 0) {
-            regionRepository.saveAll(regions);
+            regionRepository.save(new Region("광화문"));
         }
     }
 }
