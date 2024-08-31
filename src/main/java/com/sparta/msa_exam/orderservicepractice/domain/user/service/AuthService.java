@@ -12,10 +12,12 @@ import jakarta.transaction.Transactional;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-@Slf4j
+@Slf4j(topic = "Auth 관련 로그")
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -62,5 +64,12 @@ public class AuthService {
         if (checkNickname.isPresent()) {
             throw new IllegalArgumentException("중복된 닉네임 입니다.");
         }
+    }
+
+    @Cacheable(cacheNames = "userCache", key = "args[0]")
+    public User readUser(String username) {
+        log.info("Cache 동작 여부 확인");
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Not Found " + username));
     }
 }
