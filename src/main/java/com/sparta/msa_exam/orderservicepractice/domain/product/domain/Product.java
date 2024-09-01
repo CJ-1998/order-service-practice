@@ -1,6 +1,7 @@
 package com.sparta.msa_exam.orderservicepractice.domain.product.domain;
 
 import com.sparta.msa_exam.orderservicepractice.domain.order_product.domain.OrderProduct;
+import com.sparta.msa_exam.orderservicepractice.domain.product.domain.dtos.ProductRequestDto;
 import com.sparta.msa_exam.orderservicepractice.domain.product.domain.enums.ProductStatus;
 import com.sparta.msa_exam.orderservicepractice.domain.store.domain.Store;
 import com.sparta.msa_exam.orderservicepractice.global.base.domain.BaseEntity;

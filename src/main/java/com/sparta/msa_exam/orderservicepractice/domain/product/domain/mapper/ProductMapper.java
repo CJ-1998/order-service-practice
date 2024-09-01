@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProductMapper {
 
-    // DTO to Entity using Builder
     public Product toProduct(ProductRequestDto dto) {
         if (dto == null) {
             throw new ServiceException(ErrorCode.NULL_OR_EMPTY_VALUE);
@@ -22,7 +21,6 @@ public class ProductMapper {
                 .build();
     }
 
-    // Entity to DTO using Builder
     public ProductResponseDto toProductResponseDto(Product product) {
         if (product == null) {
             throw new ServiceException(ErrorCode.NULL_OR_EMPTY_VALUE);
@@ -33,7 +31,7 @@ public class ProductMapper {
                 .description(product.getDescription())
                 .price(product.getPrice())
                 .status(product.getStatus())
-//                .store(product.getStore())
+                .store(product.getStore())
                 .build();
     }
 }

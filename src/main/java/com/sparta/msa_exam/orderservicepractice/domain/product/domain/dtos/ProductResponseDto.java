@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sparta.msa_exam.orderservicepractice.domain.product.domain.enums.ProductStatus;
 import com.sparta.msa_exam.orderservicepractice.domain.store.domain.Store;
-import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,15 +28,16 @@ public class ProductResponseDto {
     @JsonProperty("status")
     private ProductStatus status;
 
-//    @JsonProperty("store")
-//    private Store store;
+    @JsonProperty("storeId")
+    private UUID storeId;
 
     @Builder
-    public ProductResponseDto(UUID id, String name, String description, Integer price, ProductStatus status) {
+    public ProductResponseDto(UUID id, String name, String description, Integer price, ProductStatus status, Store store) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
         this.status = status;
+        this.storeId  = store.getId();
     }
 }
