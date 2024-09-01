@@ -34,6 +34,8 @@ public class Store extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    private String description;
+
     private String name;
 
     private String address;
@@ -73,7 +75,8 @@ public class Store extends BaseEntity {
     }
 
     @Builder
-    public Store(String address, String name, Region region, User user) {
+    public Store(String description, String address, String name, Region region, User user) {
+        this.description = description;
         this.address = address;
         this.name = name;
         this.region = region;
@@ -84,6 +87,7 @@ public class Store extends BaseEntity {
     public static Store from(CreateStoreRequest request, Region region, User user) {
         return Store.builder()
                 .name(request.name())
+                .description(request.description())
                 .address(request.address())
                 .region(region)
                 .user(user)
@@ -92,6 +96,7 @@ public class Store extends BaseEntity {
 
     public void updateInfo(@Valid UpdateStoreRequest request, Region region) {
         this.name = request.name();
+        this.description = request.description();
         this.address = request.address();
         this.region = region;
     }
