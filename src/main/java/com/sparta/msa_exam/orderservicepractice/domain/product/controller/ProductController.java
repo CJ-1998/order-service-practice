@@ -32,7 +32,7 @@ public class ProductController {
     private final ProductMapper productMapper;
 
     @Secured({UserRole.Authority.ADMIN, UserRole.Authority.OWNER})
-    @PostMapping("/{storeId}") // store 에 product 등록
+    @PostMapping("/stores/{storeId}") // store 에 product 등록
     public ResponseEntity<ResponseBody<ProductResponseDto>> createProduct(
             @RequestBody @Valid ProductRequestDto productRequestDto,
             @PathVariable UUID storeId) {
