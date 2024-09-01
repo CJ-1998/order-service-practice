@@ -43,8 +43,9 @@ public class StoreController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseBody<Page<StoreInfo>>> getStores(Pageable pageable) {
-        return ResponseEntity.ok(createSuccessResponse(storeService.getStores(pageable)));
+    public ResponseEntity<ResponseBody<Page<StoreInfo>>> getStores(Pageable pageable,
+                                                                   @RequestParam(required = false) String keyword) {
+        return ResponseEntity.ok(createSuccessResponse(storeService.getStores(pageable, keyword)));
     }
 
     @Secured({UserRole.Authority.ADMIN, UserRole.Authority.OWNER})
