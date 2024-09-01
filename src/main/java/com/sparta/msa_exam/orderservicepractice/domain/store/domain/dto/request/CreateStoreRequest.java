@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public record CreateStoreRequest(
         @NotBlank String name,
+        @NotBlank String description,
         @NotBlank String address,
         @NotBlank String regionName,
         @Nullable List<String> categoryName

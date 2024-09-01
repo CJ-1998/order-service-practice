@@ -11,6 +11,7 @@ import java.util.UUID;
 public record StoreInfo(
         UUID id,
         String name,
+        String description,
         String address,
         StoreStatus status,
         String regionName,
@@ -26,6 +27,7 @@ public record StoreInfo(
         return new StoreInfo(
                 store.getId(),
                 store.getName(),
+                store.getDescription(),
                 store.getAddress(),
                 store.getStatus(),
                 store.getRegion().getName(),

@@ -48,7 +48,7 @@ public class StoreService {
         assert request.categoryName() != null;
         request.categoryName().forEach(categoryName -> {
             Category category = categoryRepository.findByName(categoryName)
-                    .orElseThrow(() -> new IllegalArgumentException("Region not found"));
+                    .orElseThrow(() -> new IllegalArgumentException("Category not found"));
             storeCategoryRepository.save(new StoreCategory(category, store));
         });
     }
@@ -59,12 +59,20 @@ public class StoreService {
                 .orElseThrow(() -> new IllegalArgumentException("Store not found"));
     }
 
-    public Page<StoreInfo> getStores(Pageable pageable) {
-        Page<Store> storePage = storeRepository.findAll(pageable);
-        List<StoreInfo> storeInfoList = storePage.getContent().stream()
-                .map(StoreInfo::from)
-                .toList();
-        return new PageImpl<>(storeInfoList, pageable, storePage.getTotalElements());
+    public Page<StoreInfo> getStores(Pageable pageable, String keyword) {
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            Page<Store> storePage = storeRepository.findByKeyword(keyword, pageable);
+            List<StoreInfo> storeInfoList = storePage.getContent().stream()
+                    .map(StoreInfo::from)
+                    .toList();
+            return new PageImpl<>(storeInfoList, pageable, storePage.getTotalElements());
+        } else {
+            Page<Store> storePage = storeRepository.findAll(pageable);
+            List<StoreInfo> storeInfoList = storePage.getContent().stream()
+                    .map(StoreInfo::from)
+                    .toList();
+            return new PageImpl<>(storeInfoList, pageable, storePage.getTotalElements());
+        }
     }
 
     @Transactional
