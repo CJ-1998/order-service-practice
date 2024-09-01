@@ -18,17 +18,25 @@ public class OrderProductResponseDto {
     @JsonProperty("productId")
     private UUID productId;
 
+    @JsonProperty("productName")
+    private String productName;
+
     @JsonProperty("quantity")
     private Integer quantity;
+
+    @JsonProperty("price")
+    private Integer price;
 
     @JsonProperty("totalPrice")
     private Integer totalPrice;
 
     @Builder
-    public OrderProductResponseDto(UUID orderId, UUID productId, Integer quantity, Integer totalPrice) {
+    public OrderProductResponseDto(UUID orderId, UUID productId, String productName, Integer quantity, Integer price, Integer totalPrice) {
         this.orderId = orderId;
         this.productId = productId;
+        this.productName = productName;
         this.quantity = quantity;
+        this.price = price;
         this.totalPrice = totalPrice;
     }
 }

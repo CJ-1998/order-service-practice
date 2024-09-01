@@ -5,9 +5,10 @@ import com.sparta.msa_exam.orderservicepractice.domain.order.domain.dtos.OrderRe
 import com.sparta.msa_exam.orderservicepractice.domain.order.domain.enums.OrderStatus;
 import com.sparta.msa_exam.orderservicepractice.domain.order.repository.OrderRepository;
 import com.sparta.msa_exam.orderservicepractice.domain.order_product.domain.OrderProduct;
-import com.sparta.msa_exam.orderservicepractice.domain.order_product.domain.dtos.OrderProductRequestDto;
 import com.sparta.msa_exam.orderservicepractice.domain.order_product.service.OrderProductService;
 import com.sparta.msa_exam.orderservicepractice.domain.payment.domain.enums.PaymentStatus;
+import com.sparta.msa_exam.orderservicepractice.domain.product.domain.Product;
+import com.sparta.msa_exam.orderservicepractice.domain.product.repository.ProductRepository;
 import com.sparta.msa_exam.orderservicepractice.domain.store.domain.Store;
 import com.sparta.msa_exam.orderservicepractice.domain.store.repository.StoreRepository;
 import com.sparta.msa_exam.orderservicepractice.domain.user.domain.User;
@@ -17,6 +18,7 @@ import com.sparta.msa_exam.orderservicepractice.global.base.exception.ErrorCode;
 import com.sparta.msa_exam.orderservicepractice.global.base.exception.ServiceException;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,15 +32,13 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
+    private final ProductRepository productRepository;
     private final OrderProductService orderProductService;
 
     @Transactional
     public Order createOrder(OrderRequestDto orderDto, UserDetailsImpl userDetails) {
-
-        User user = userRepository.findById(userDetails.getUser().getId())
-                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
-        Store store = storeRepository.findById(orderDto.getStoreId())
-                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
+        User user = getUserById(userDetails.getUser().getId());
+        Store store = getStoreById(orderDto.getStoreId());
 
         Order order = Order.builder()
                 .orderAddress(orderDto.getOrderAddress())
@@ -50,11 +50,10 @@ public class OrderService {
                 .store(store)
                 .build();
 
-        orderRepository.save(order);
+        order = orderRepository.save(order);
 
-        // 추가된 제품 정보가 있으면 주문에 추가
         if (orderDto.hasOrderProducts()) {
-            updateOrderProducts(order, orderDto.getOrderProducts());
+            orderProductService.createAndAddOrderProducts(order, orderDto.getOrderProducts());
         }
 
         return orderRepository.save(order);
@@ -81,17 +80,23 @@ public class OrderService {
         return orderRepository.findAllByOrderStatus(status, pageable);
     }
 
-    @Transactional
     public Order updateOrder(UUID orderId, OrderRequestDto orderRequestDto) {
         Order order = getOrderById(orderId);
 
-        // 필드별 업데이트
         order.updateOrderAddress(orderRequestDto.getOrderAddress());
         order.updateOrderRequest(orderRequestDto.getOrderRequest());
         order.updateOrderCategory(orderRequestDto.getOrderCategory());
 
         if (orderRequestDto.hasOrderProducts()) {
-            updateOrderProducts(order, orderRequestDto.getOrderProducts());
+            List<OrderProduct> newOrderProducts = orderRequestDto.getOrderProducts().stream()
+                    .map(dto -> {
+                        Product product = productRepository.findById(dto.getProductId())
+                                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
+                        return new OrderProduct(order, product, dto.getQuantity());
+                    })
+                    .collect(Collectors.toList());
+
+            order.updateOrderProducts(newOrderProducts);
         }
 
         return orderRepository.save(order);
@@ -111,9 +116,13 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    private void updateOrderProducts(Order order, List<OrderProductRequestDto> orderProducts) {
-        // 기존 제품 리스트를 새로운 리스트로 교체
-        List<OrderProduct> updatedProducts = orderProductService.mapToOrderProducts(order, orderProducts);
-        order.updateOrderProducts(updatedProducts);
+    private User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
+    }
+
+    private Store getStoreById(UUID storeId) {
+        return storeRepository.findById(storeId)
+                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
     }
 }

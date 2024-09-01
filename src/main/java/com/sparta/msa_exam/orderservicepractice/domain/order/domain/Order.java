@@ -98,14 +98,6 @@ public class Order extends BaseEntity {
         }
     }
 
-    public void updateOrderProducts(List<OrderProduct> orderProducts) {
-        if (orderProducts != null && !orderProducts.isEmpty()) {
-            this.orderProducts.clear();
-            this.orderProducts.addAll(new ArrayList<>(orderProducts)); // 방어적 복사
-            updateTotalPrice();
-        }
-    }
-
     public void updateOrderStatus(OrderStatus orderStatus) {
         if (orderStatus != null) {
             this.orderStatus = orderStatus;
@@ -139,15 +131,22 @@ public class Order extends BaseEntity {
     }
 
     public void addOrderProduct(OrderProduct orderProduct) {
-        if (orderProduct != null) {
-            this.orderProducts.add(orderProduct);
-            updateTotalPrice();
+        orderProducts.add(orderProduct);
+        orderProduct.setOrder(this);
+    }
+
+    public void updateOrderProducts(List<OrderProduct> newOrderProducts) {
+        orderProducts.clear();
+        if (newOrderProducts != null) {
+            for (OrderProduct orderProduct : newOrderProducts) {
+                addOrderProduct(orderProduct);
+            }
         }
+        updateTotalPrice();
     }
 
     public void removeOrderProduct(OrderProduct orderProduct) {
-        if (orderProduct != null && this.orderProducts.remove(orderProduct)) {
-            updateTotalPrice();
-        }
+        orderProducts.remove(orderProduct);
+        orderProduct.setOrder(null);
     }
 }

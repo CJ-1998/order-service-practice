@@ -13,10 +13,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class OrderProductMapper {
 
-    public OrderProduct toOrderProduct(Order order, Product product, OrderProductRequestDto dto) {
-        return new OrderProduct(order, product, dto.getQuantity());
-    }
-
     public OrderProductResponseDto toOrderProductResponseDto(OrderProduct orderProduct) {
         return OrderProductResponseDto.builder()
                 .orderId(orderProduct.getOrder().getId())

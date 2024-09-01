@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class OrderProductService {
+
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final OrderProductRepository orderProductRepository;
@@ -26,42 +27,55 @@ public class OrderProductService {
     @Transactional
     public Order addProductToOrder(UUID orderId, OrderProductRequestDto productRequest) {
         Order order = getOrderById(orderId);
-        Product product = getProductById(productRequest.getProductId());
-
-        OrderProduct orderProduct = new OrderProduct(order, product, productRequest.getQuantity());
-        order.addOrderProduct(orderProduct);
-
-        orderProductRepository.save(orderProduct);
-        order.updateTotalPrice();
-
+        OrderProduct newOrderProduct = createOrderProduct(order, productRequest);
+        order.addOrderProduct(newOrderProduct);
         return orderRepository.save(order);
+    }
+
+    @Transactional
+    public void createAndAddOrderProducts(Order order, List<OrderProductRequestDto> productRequests) {
+        List<OrderProduct> newOrderProducts = productRequests.stream()
+                .map(req -> createOrderProduct(order, req))
+                .collect(Collectors.toList());
+        order.updateOrderProducts(newOrderProducts);
+    }
+
+    @Transactional
+    public void updateOrderProducts(Order order, List<OrderProductRequestDto> productRequests) {
+        List<OrderProduct> updatedOrderProducts = productRequests.stream()
+                .map(req -> createOrderProduct(order, req))
+                .collect(Collectors.toList());
+        order.updateOrderProducts(updatedOrderProducts);
     }
 
     @Transactional
     public Order updateProductQuantity(UUID orderId, UUID productId, Integer quantity) {
-
-        OrderProduct orderProduct = getOrderProductByOrderIdAndProductId(orderId, productId);
-        Order order = orderProduct.getOrder();
+        Order order = getOrderById(orderId);
+        OrderProduct orderProduct = order.getOrderProducts().stream()
+                .filter(op -> op.getProduct().getId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
 
         orderProduct.updateQuantity(quantity);
         order.updateTotalPrice();
-
         return orderRepository.save(order);
     }
 
     @Transactional
-    public OrderProduct removeProductFromOrder(UUID orderId, UUID productId) {
+    public Order removeProductFromOrder(UUID orderId, UUID productId) {
+        Order order = getOrderById(orderId);
+
         OrderProduct orderProduct = orderProductRepository.findByOrderIdAndProductId(orderId, productId)
                 .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
 
-        orderProductRepository.delete(orderProduct);
+        order.removeOrderProduct(orderProduct);
 
-        return orderProduct;
+        return orderRepository.save(order);
     }
 
-    private Order getOrderById(UUID orderId) {
-        return orderRepository.findById(orderId)
-                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
+    private OrderProduct createOrderProduct(Order order, OrderProductRequestDto request) {
+        Product product = getProductById(request.getProductId());
+        return new OrderProduct(order, product, request.getQuantity());
     }
 
     private Product getProductById(UUID productId) {
@@ -69,14 +83,8 @@ public class OrderProductService {
                 .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
     }
 
-    private OrderProduct getOrderProductByOrderIdAndProductId(UUID orderId, UUID productId) {
-        return orderProductRepository.findByOrderIdAndProductId(orderId, productId)
+    private Order getOrderById(UUID orderId) {
+        return orderRepository.findById(orderId)
                 .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
-    }
-
-    public List<OrderProduct> mapToOrderProducts(Order order, List<OrderProductRequestDto> productRequestDtos) {
-        return productRequestDtos.stream()
-                .map(dto -> new OrderProduct(order, getProductById(dto.getProductId()), dto.getQuantity()))
-                .collect(Collectors.toList());
     }
 }

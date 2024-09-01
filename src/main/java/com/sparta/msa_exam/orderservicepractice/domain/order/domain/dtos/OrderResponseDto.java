@@ -43,10 +43,13 @@ public class OrderResponseDto {
     @JsonProperty("totalPrice")
     private Integer totalPrice;
 
+    @JsonProperty("orderProducts")
+    private List<OrderProductResponseDto> orderProducts;
+
     @Builder
     public OrderResponseDto(UUID orderId, UUID storeId, Long userId, String orderAddress, String orderRequest,
                             OrderStatus orderStatus, PaymentStatus paymentStatus, OrderCategory orderCategory,
-                            Integer totalPrice) {
+                            Integer totalPrice, List<OrderProductResponseDto> orderProducts) {
         this.orderId = orderId;
         this.storeId = storeId;
         this.userId = userId;
@@ -56,5 +59,6 @@ public class OrderResponseDto {
         this.paymentStatus = paymentStatus;
         this.orderCategory = orderCategory;
         this.totalPrice = totalPrice;
+        this.orderProducts = orderProducts;
     }
 }
