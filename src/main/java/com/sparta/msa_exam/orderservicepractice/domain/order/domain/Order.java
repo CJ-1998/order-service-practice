@@ -1,5 +1,6 @@
 package com.sparta.msa_exam.orderservicepractice.domain.order.domain;
 
+import com.sparta.msa_exam.orderservicepractice.domain.order.domain.dtos.OrderRequestDto;
 import com.sparta.msa_exam.orderservicepractice.domain.order.domain.enums.OrderCategory;
 import com.sparta.msa_exam.orderservicepractice.domain.order.domain.enums.OrderStatus;
 import com.sparta.msa_exam.orderservicepractice.domain.order_product.domain.OrderProduct;
@@ -31,9 +32,6 @@ public class Order extends BaseEntity {
     @Column(name = "order_id", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "total_price", nullable = false)
-    private Integer totalPrice;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "order_status", nullable = false)
     private OrderStatus orderStatus = OrderStatus.PENDING;
@@ -46,7 +44,7 @@ public class Order extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false)
-    private PaymentStatus paymentStatus;
+    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "order_category", nullable = false)
@@ -63,45 +61,67 @@ public class Order extends BaseEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderProduct> orderProducts = new ArrayList<>();
 
+    @Column(name = "total_price")
+    private Integer totalPrice = 0;
+
+
     @Builder
-    private Order(Integer totalPrice, String orderAddress, String orderRequest,
-                  OrderCategory orderCategory, OrderStatus orderStatus, User user, Store store, List<OrderProduct> orderProducts) {
-        this.totalPrice = totalPrice;
+    public Order(UUID id, OrderStatus orderStatus, String orderAddress, String orderRequest, PaymentStatus paymentStatus,
+                 OrderCategory orderCategory, User user, Store store, List<OrderProduct> orderProducts) {
+        this.id = id;
+        this.orderStatus = orderStatus != null ? orderStatus : OrderStatus.PENDING;
         this.orderAddress = orderAddress;
         this.orderRequest = orderRequest;
-        this.paymentStatus = PaymentStatus.PENDING;
+        this.paymentStatus = paymentStatus != null ? paymentStatus : PaymentStatus.PENDING;
         this.orderCategory = orderCategory;
-        this.orderStatus = orderStatus;
         this.user = user;
         this.store = store;
-        if (orderProducts != null) {
-            this.orderProducts = orderProducts;
+        this.orderProducts = orderProducts != null ? new ArrayList<>(orderProducts) : new ArrayList<>();
+        this.updateTotalPrice();
+    }
+
+    public void updateOrderAddress(String orderAddress) {
+        if (orderAddress != null && !orderAddress.isEmpty()) {
+            this.orderAddress = orderAddress;
         }
     }
 
-    public void updateDetails(Order updatedOrder) {
-        this.totalPrice = updatedOrder.getTotalPrice();
-        this.orderAddress = updatedOrder.getOrderAddress();
-        this.orderRequest = updatedOrder.getOrderRequest();
-        this.paymentStatus = updatedOrder.getPaymentStatus();
-        this.orderCategory = updatedOrder.getOrderCategory();
-        this.orderStatus = updatedOrder.getOrderStatus();
-        this.user = updatedOrder.getUser();
-        this.store = updatedOrder.getStore();
+    public void updateOrderRequest(String orderRequest) {
+        if (orderRequest != null && !orderRequest.isEmpty()) {
+            this.orderRequest = orderRequest;
+        }
     }
 
-    public void updateTotalPrice() {
-        this.totalPrice = orderProducts.stream()
-                .map(orderProduct -> orderProduct.getProduct().getPrice() * orderProduct.getQuantity())
-                .reduce(0, Integer::sum);
+    public void updateOrderCategory(OrderCategory orderCategory) {
+        if (orderCategory != null) {
+            this.orderCategory = orderCategory;
+        }
     }
 
-    public void updateStatus(OrderStatus orderStatus) {
-        this.orderStatus = orderStatus;
+    public void updateOrderProducts(List<OrderProduct> orderProducts) {
+        if (orderProducts != null && !orderProducts.isEmpty()) {
+            this.orderProducts.clear();
+            this.orderProducts.addAll(new ArrayList<>(orderProducts)); // 방어적 복사
+            updateTotalPrice();
+        }
+    }
+
+    public void updateOrderStatus(OrderStatus orderStatus) {
+        if (orderStatus != null) {
+            this.orderStatus = orderStatus;
+        }
     }
 
     public void updatePaymentStatus(PaymentStatus paymentStatus) {
-        this.paymentStatus = paymentStatus;
+        if (paymentStatus != null) {
+            this.paymentStatus = paymentStatus;
+        }
+    }
+
+    public void updateTotalPrice() {
+        this.totalPrice = this.orderProducts.stream()
+                .mapToInt(orderProduct -> orderProduct.getProduct().getPrice() * orderProduct.getQuantity())
+                .sum();
     }
 
     public void cancelOrder() {
@@ -119,13 +139,15 @@ public class Order extends BaseEntity {
     }
 
     public void addOrderProduct(OrderProduct orderProduct) {
-        this.orderProducts.add(orderProduct);
-        orderProduct.setOrder(this);
+        if (orderProduct != null) {
+            this.orderProducts.add(orderProduct);
+            updateTotalPrice();
+        }
     }
 
     public void removeOrderProduct(OrderProduct orderProduct) {
-        if (orderProducts.remove(orderProduct)) {
-            orderProduct.setOrder(null);
+        if (orderProduct != null && this.orderProducts.remove(orderProduct)) {
+            updateTotalPrice();
         }
     }
 }

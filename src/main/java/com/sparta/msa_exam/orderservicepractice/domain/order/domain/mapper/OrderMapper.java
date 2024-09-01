@@ -17,52 +17,25 @@ import org.springframework.stereotype.Component;
 @Component
 public class OrderMapper {
 
-    private final ProductRepository productRepository;
-
-    public OrderMapper(ProductRepository productRepository) {
-        this.productRepository = productRepository;
-    }
-
-    // DTO to Entity using Builder
     public Order toOrder(OrderRequestDto dto) {
         if (dto == null) {
             throw new ServiceException(ErrorCode.NULL_OR_EMPTY_VALUE);
         }
 
-        // Create the order
         Order order = Order.builder()
-                .totalPrice(dto.getTotalPrice())
                 .orderAddress(dto.getOrderAddress())
                 .orderRequest(dto.getOrderRequest())
                 .orderCategory(dto.getOrderCategory())
                 .build();
 
-        // Add products to the order
-        if (dto.getProducts() != null) {
-            for (OrderProductRequestDto productDto : dto.getProducts()) {
-                Product product = productRepository.findById(productDto.getProductId())
-                        .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
-
-                OrderProduct orderProduct = OrderProduct.builder()
-                        .order(order)
-                        .product(product)
-                        .quantity(productDto.getQuantity())
-                        .build();
-
-                order.getOrderProducts().add(orderProduct);
-            }
-        }
-
         return order;
     }
 
-    // Entity to DTO
     public OrderResponseDto toOrderResponseDto(Order order) {
         if (order == null) {
             throw new ServiceException(ErrorCode.NULL_OR_EMPTY_VALUE);
         }
 
-        // Convert order products to DTO
         List<OrderProductResponseDto> productDtos = order.getOrderProducts().stream()
                 .map(orderProduct -> OrderProductResponseDto.builder()
                         .productId(orderProduct.getProduct().getId())
@@ -72,7 +45,6 @@ public class OrderMapper {
 
         return OrderResponseDto.builder()
                 .orderId(order.getId())
-                .totalPrice(order.getTotalPrice())
                 .orderStatus(order.getOrderStatus())
                 .orderAddress(order.getOrderAddress())
                 .orderRequest(order.getOrderRequest())
@@ -80,7 +52,6 @@ public class OrderMapper {
                 .orderCategory(order.getOrderCategory())
                 .userId(order.getUser().getId())
                 .storeId(order.getStore().getId())
-                .products(productDtos)
                 .build();
     }
 }

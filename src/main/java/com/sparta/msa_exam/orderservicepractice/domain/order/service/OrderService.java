@@ -6,9 +6,8 @@ import com.sparta.msa_exam.orderservicepractice.domain.order.domain.enums.OrderS
 import com.sparta.msa_exam.orderservicepractice.domain.order.repository.OrderRepository;
 import com.sparta.msa_exam.orderservicepractice.domain.order_product.domain.OrderProduct;
 import com.sparta.msa_exam.orderservicepractice.domain.order_product.domain.dtos.OrderProductRequestDto;
-import com.sparta.msa_exam.orderservicepractice.domain.order_product.repository.OrderProductRepository;
-import com.sparta.msa_exam.orderservicepractice.domain.product.domain.Product;
-import com.sparta.msa_exam.orderservicepractice.domain.product.repository.ProductRepository;
+import com.sparta.msa_exam.orderservicepractice.domain.order_product.service.OrderProductService;
+import com.sparta.msa_exam.orderservicepractice.domain.payment.domain.enums.PaymentStatus;
 import com.sparta.msa_exam.orderservicepractice.domain.store.domain.Store;
 import com.sparta.msa_exam.orderservicepractice.domain.store.repository.StoreRepository;
 import com.sparta.msa_exam.orderservicepractice.domain.user.domain.User;
@@ -29,13 +28,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final ProductRepository productRepository;
-    private final OrderProductRepository orderProductRepository;
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
+    private final OrderProductService orderProductService;
 
     @Transactional
-    public Order createOrder(OrderRequestDto orderDto, List<OrderProductRequestDto> products, UserDetailsImpl userDetails) {
+    public Order createOrder(OrderRequestDto orderDto, UserDetailsImpl userDetails) {
 
         User user = userRepository.findById(userDetails.getUser().getId())
                 .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
@@ -43,54 +41,29 @@ public class OrderService {
                 .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
 
         Order order = Order.builder()
-                .totalPrice(orderDto.getTotalPrice())
                 .orderAddress(orderDto.getOrderAddress())
                 .orderRequest(orderDto.getOrderRequest())
                 .orderCategory(orderDto.getOrderCategory())
                 .orderStatus(OrderStatus.PENDING)
+                .paymentStatus(PaymentStatus.PENDING)
                 .user(user)
                 .store(store)
                 .build();
 
-        Order createdOrder = orderRepository.save(order);
+        orderRepository.save(order);
 
-        for (OrderProductRequestDto productDto : products) {
-            Product product = productRepository.findById(productDto.getProductId())
-                    .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
-
-            OrderProduct orderProduct = OrderProduct.builder()
-                    .order(createdOrder)
-                    .product(product)
-                    .quantity(productDto.getQuantity())
-                    .build();
-
-            orderProductRepository.save(orderProduct);
-            createdOrder.addOrderProduct(orderProduct);
+        // 추가된 제품 정보가 있으면 주문에 추가
+        if (orderDto.hasOrderProducts()) {
+            updateOrderProducts(order, orderDto.getOrderProducts());
         }
 
-        return createdOrder;
+        return orderRepository.save(order);
     }
-
 
     @Transactional(readOnly = true)
     public Order getOrderById(UUID orderId) {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
-    }
-
-    @Transactional(readOnly = true)
-    public List<Order> getOrdersByUserId(Long userId) {
-        return orderRepository.findAllByUserId(userId);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Order> getAllOrders() {
-        return orderRepository.findAll();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Order> getOrdersByStatus(OrderStatus status) {
-        return orderRepository.findAllByOrderStatus(status);
     }
 
     @Transactional(readOnly = true)
@@ -109,82 +82,38 @@ public class OrderService {
     }
 
     @Transactional
-    public Order updateOrder(UUID orderId, Order orderToUpdate, List<OrderProductRequestDto> products) {
-        return orderRepository.findById(orderId)
-                .map(order -> {
-                    order.updateDetails(orderToUpdate);
-                    orderProductRepository.deleteByOrderId(orderId);
+    public Order updateOrder(UUID orderId, OrderRequestDto orderRequestDto) {
+        Order order = getOrderById(orderId);
 
-                    for (OrderProductRequestDto productDto : products) {
-                        Product product = productRepository.findById(productDto.getProductId())
-                                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
+        // 필드별 업데이트
+        order.updateOrderAddress(orderRequestDto.getOrderAddress());
+        order.updateOrderRequest(orderRequestDto.getOrderRequest());
+        order.updateOrderCategory(orderRequestDto.getOrderCategory());
 
-                        OrderProduct orderProduct = new OrderProduct(order, product, productDto.getQuantity());
-                        orderProductRepository.save(orderProduct);
-                        order.addOrderProduct(orderProduct);
-                    }
+        if (orderRequestDto.hasOrderProducts()) {
+            updateOrderProducts(order, orderRequestDto.getOrderProducts());
+        }
 
-                    return orderRepository.save(order);
-                })
-                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
+        return orderRepository.save(order);
     }
 
     @Transactional
     public Order cancelOrder(UUID orderId) {
-        return orderRepository.findById(orderId)
-                .map(order -> {
-                    order.cancelOrder();
-                    return orderRepository.save(order);
-                })
-                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
+        Order order = getOrderById(orderId);
+        order.cancelOrder();
+        return orderRepository.save(order);
     }
 
     @Transactional
     public Order deleteOrder(UUID orderId) {
-        return orderRepository.findById(orderId)
-                .map(order -> {
-                    order.deleteOrder();
-                    return orderRepository.save(order);
-                })
-                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
-    }
-
-    @Transactional
-    public Order addProductToOrder(UUID orderId, UUID productId, Integer quantity) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
-
-        OrderProduct orderProduct = new OrderProduct(order, product, quantity);
-        orderProductRepository.save(orderProduct);
-
-        order.addOrderProduct(orderProduct);
+        Order order = getOrderById(orderId);
+        order.deleteOrder();
         return orderRepository.save(order);
     }
 
-    @Transactional
-    public Order removeProductFromOrder(UUID orderId, UUID productId) {
-        OrderProduct orderProduct = orderProductRepository.findByOrderIdAndProductId(orderId, productId)
-                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
-
-        orderProductRepository.delete(orderProduct);
-
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
-        order.removeOrderProduct(orderProduct);
-        return orderRepository.save(order);
-    }
-
-    @Transactional
-    public Order updateProductQuantity(UUID orderId, UUID productId, Integer quantity) {
-        OrderProduct orderProduct = orderProductRepository.findByOrderIdAndProductId(orderId, productId)
-                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
-
-        orderProduct.updateQuantity(quantity);
-        orderProductRepository.save(orderProduct);
-
-        return orderRepository.findById(orderId)
-                .orElseThrow(() -> new ServiceException(ErrorCode.NOT_FOUND));
+    private void updateOrderProducts(Order order, List<OrderProductRequestDto> orderProducts) {
+        // 기존 제품 리스트를 새로운 리스트로 교체
+        List<OrderProduct> updatedProducts = orderProductService.mapToOrderProducts(order, orderProducts);
+        order.updateOrderProducts(updatedProducts);
     }
 }

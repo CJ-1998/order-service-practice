@@ -7,6 +7,8 @@ import com.sparta.msa_exam.orderservicepractice.domain.order.domain.enums.OrderS
 import com.sparta.msa_exam.orderservicepractice.domain.order.domain.mapper.OrderMapper;
 import com.sparta.msa_exam.orderservicepractice.domain.order.service.OrderService;
 import com.sparta.msa_exam.orderservicepractice.domain.order_product.domain.dtos.OrderProductRequestDto;
+import com.sparta.msa_exam.orderservicepractice.domain.order_product.domain.dtos.OrderProductResponseDto;
+import com.sparta.msa_exam.orderservicepractice.domain.order_product.domain.mapper.OrderProductMapper;
 import com.sparta.msa_exam.orderservicepractice.domain.user.domain.UserRole;
 import com.sparta.msa_exam.orderservicepractice.domain.user.security.UserDetailsImpl;
 import com.sparta.msa_exam.orderservicepractice.global.base.dto.ResponseBody;
@@ -32,15 +34,14 @@ public class OrderController {
 
     private final OrderService orderService;
     private final OrderMapper orderMapper;
+    private final OrderProductMapper orderProductMapper;
 
     @PostMapping // 주문 생성
     public ResponseEntity<ResponseBody<OrderResponseDto>> createOrder(
             @RequestBody @Valid OrderRequestDto orderRequestDto,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        List<OrderProductRequestDto> products = orderRequestDto.getProducts();
-        Order createdOrder = orderService.createOrder(orderRequestDto, products, userDetails);
-
+        Order createdOrder = orderService.createOrder(orderRequestDto, userDetails);
         OrderResponseDto responseDto = orderMapper.toOrderResponseDto(createdOrder);
 
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDto));
@@ -60,50 +61,28 @@ public class OrderController {
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdDate") String sortBy,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDirection) {
 
-        // 페이지 크기 제한: 10, 30, 50 이외의 값은 10으로 고정
-        if (size != 10 && size != 30 && size != 50) {
-            size = 10;
-        }
-
-        // 정렬 방향 처리
-        Sort.Direction direction = Sort.Direction.fromString(sortDirection.toUpperCase());
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-
-        Page<Order> orderPage;
-
-        if (status != null) {
-            orderPage = orderService.getOrdersByStatus(status, pageable);
-        } else {
-            orderPage = orderService.getAllOrders(pageable);
-        }
+        Pageable pageable = createPageRequest(page, size, sortBy, sortDirection);
+        Page<Order> orderPage = status != null
+                ? orderService.getOrdersByStatus(status, pageable)
+                : orderService.getAllOrders(pageable);
 
         Page<OrderResponseDto> responseDtos = orderPage.map(orderMapper::toOrderResponseDto);
 
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDtos));
     }
 
-    @GetMapping("/{userId}") // 특정 유저의 주문 조회
+    @GetMapping("/user/{userId}") // 특정 유저의 주문 조회
     public ResponseEntity<ResponseBody<Page<OrderResponseDto>>> getOrdersByUserId(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdDate") String sortBy,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDirection) {
 
-        // 페이지 크기 제한: 10, 30, 50 이외의 값은 10으로 고정
-        if (size != 10 && size != 30 && size != 50) {
-            size = 10;
-        }
-
-        // 정렬 방향 처리
-        Sort.Direction direction = Sort.Direction.fromString(sortDirection.toUpperCase());
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-
+        Pageable pageable = createPageRequest(page, size, sortBy, sortDirection);
         Page<Order> orderPage = orderService.getOrdersByUserId(userId, pageable);
 
         Page<OrderResponseDto> responseDtos = orderPage.map(orderMapper::toOrderResponseDto);
@@ -116,9 +95,7 @@ public class OrderController {
             @PathVariable UUID orderId,
             @RequestBody @Valid OrderRequestDto orderRequestDto) {
 
-        Order orderToUpdate = orderMapper.toOrder(orderRequestDto);
-        List<OrderProductRequestDto> products = orderRequestDto.getProducts();
-        Order updatedOrder = orderService.updateOrder(orderId, orderToUpdate, products);
+        Order updatedOrder = orderService.updateOrder(orderId, orderRequestDto);
         OrderResponseDto responseDto = orderMapper.toOrderResponseDto(updatedOrder);
 
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDto));
@@ -141,38 +118,14 @@ public class OrderController {
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDto));
     }
 
-    @PostMapping("/{orderId}/products/{productId}") // 주문에 제품 추가
-    public ResponseEntity<ResponseBody<OrderResponseDto>> addProductToOrder(
-            @PathVariable UUID orderId,
-            @PathVariable UUID productId,
-            @RequestParam Integer quantity) {
+    private Pageable createPageRequest(int page, int size, String sortBy, String sortDirection) {
+        // 페이지 크기 제한: 10, 30, 50 이외의 값은 10으로 고정
+        if (size != 10 && size != 30 && size != 50) {
+            size = 10;
+        }
 
-        Order updatedOrder = orderService.addProductToOrder(orderId, productId, quantity);
-        OrderResponseDto responseDto = orderMapper.toOrderResponseDto(updatedOrder);
-
-        return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDto));
-    }
-
-    @PatchMapping("/{orderId}/products/{productId}") // 주문 제품 수량 수정
-    public ResponseEntity<ResponseBody<OrderResponseDto>> updateProductQuantity(
-            @PathVariable UUID orderId,
-            @PathVariable UUID productId,
-            @RequestParam Integer quantity) {
-
-        Order updatedOrder = orderService.updateProductQuantity(orderId, productId, quantity);
-        OrderResponseDto responseDto = orderMapper.toOrderResponseDto(updatedOrder);
-
-        return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDto));
-    }
-
-    @DeleteMapping("/{orderId}/products/{productId}") // 주문에서 제품 삭제
-    public ResponseEntity<ResponseBody<OrderResponseDto>> removeProductFromOrder(
-            @PathVariable UUID orderId,
-            @PathVariable UUID productId) {
-
-        Order updatedOrder = orderService.removeProductFromOrder(orderId, productId);
-        OrderResponseDto responseDto = orderMapper.toOrderResponseDto(updatedOrder);
-
-        return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDto));
+        // 정렬 방향 처리
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection.toUpperCase());
+        return PageRequest.of(page, size, Sort.by(direction, sortBy));
     }
 }

@@ -60,23 +60,11 @@ public class ProductController {
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDirection) {
 
-        // 페이지 크기 제한: 10, 30, 50 이외의 값은 10으로 고정
-        if (size != 10 && size != 30 && size != 50) {
-            size = 10;
-        }
+        Pageable pageable = createPageRequest(page, size, sortBy, sortDirection);
 
-        // 정렬 방향 처리
-        Sort.Direction direction = Sort.Direction.fromString(sortDirection.toUpperCase());
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-
-        Page<Product> productPage;
-
-        if (status != null) {
-            productPage = productService.getProductsByStoreIdAndStatus(storeId, status, pageable);
-        } else {
-            productPage = productService.getProductsByStoreId(storeId, pageable);
-        }
+        Page<Product> productPage = (status != null)
+                ? productService.getProductsByStoreIdAndStatus(storeId, status, pageable)
+                : productService.getProductsByStoreId(storeId, pageable);
 
         Page<ProductResponseDto> responseDtos = productPage.map(productMapper::toProductResponseDto);
 
@@ -112,5 +100,16 @@ public class ProductController {
         ProductResponseDto responseDto = productMapper.toProductResponseDto(deletedProduct);
 
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDto));
+    }
+
+    private Pageable createPageRequest(int page, int size, String sortBy, String sortDirection) {
+        // 페이지 크기 제한: 10, 30, 50 이외의 값은 10으로 고정
+        if (size != 10 && size != 30 && size != 50) {
+            size = 10;
+        }
+
+        // 정렬 방향 처리
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection.toUpperCase());
+        return PageRequest.of(page, size, Sort.by(direction, sortBy));
     }
 }
