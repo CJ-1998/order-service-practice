@@ -53,13 +53,28 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+
+        // CORS 허용할 Origin 설정 (클라이언트의 도메인)
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+
+        // HTTP 메서드 허용 설정
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+
+        // 허용할 요청 헤더 설정
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+
+        // 클라이언트 측에서 쿠키와 같은 자격 증명을 포함할 수 있도록 설정
         configuration.setAllowCredentials(true);
+
+        // 노출할 헤더 설정 (클라이언트 측에서 응답 헤더에 접근할 수 있도록 허용)
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "content-disposition"));
+
+        // 옵션 요청에 대한 설정
+        configuration.setMaxAge(3600L); // preflight 요청 캐시 시간 설정
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
+
         return source;
     }
 
