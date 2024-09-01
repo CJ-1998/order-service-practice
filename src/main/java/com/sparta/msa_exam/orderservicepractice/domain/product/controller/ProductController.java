@@ -59,7 +59,7 @@ public class ProductController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDirection) {
-        
+
         // 페이지 크기 제한: 10, 30, 50 이외의 값은 10으로 고정
         if (size != 10 && size != 30 && size != 50) {
             size = 10;
