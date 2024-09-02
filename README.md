@@ -18,7 +18,8 @@
 <br>
 
 ## 서비스 구성
-<img width="924" alt="image" src="https://github.com/user-attachments/assets/8025f6e6-0055-44ad-85cf-9284bb24e034">
+<img width="1132" alt="image" src="https://github.com/user-attachments/assets/23730ed8-0b15-4656-b392-1cc797c955a3">
+
 
 ## 실행 방법
 > application.yml
