@@ -7,6 +7,7 @@ import com.sparta.msa_exam.orderservicepractice.domain.product.domain.enums.Prod
 import com.sparta.msa_exam.orderservicepractice.domain.product.domain.mapper.ProductMapper;
 import com.sparta.msa_exam.orderservicepractice.domain.product.service.ProductService;
 import com.sparta.msa_exam.orderservicepractice.domain.user.domain.UserRole;
+import com.sparta.msa_exam.orderservicepractice.global.base.dto.PagedResponseDto;
 import com.sparta.msa_exam.orderservicepractice.global.base.dto.ResponseBody;
 import com.sparta.msa_exam.orderservicepractice.global.base.dto.ResponseUtil;
 
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +34,7 @@ public class ProductController {
     private final ProductMapper productMapper;
 
     @Secured({UserRole.Authority.ADMIN, UserRole.Authority.OWNER})
-    @PostMapping("/{storeId}") // store 에 product 등록
+    @PostMapping("/stores/{storeId}") // store 에 product 등록
     public ResponseEntity<ResponseBody<ProductResponseDto>> createProduct(
             @RequestBody @Valid ProductRequestDto productRequestDto,
             @PathVariable UUID storeId) {
@@ -51,36 +53,20 @@ public class ProductController {
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDto));
     }
 
-    @GetMapping("/stores/{storeId}") // store에 등록된 product 목록 조회
-    public ResponseEntity<ResponseBody<Page<ProductResponseDto>>> getProductsByStoreId(
+    @GetMapping("/stores/{storeId}") // store 에 등록된 product 조회
+    public ResponseEntity<ResponseBody<PagedResponseDto<ProductResponseDto>>> getProductsByStoreId(
             @PathVariable UUID storeId,
             @RequestParam(required = false) ProductStatus status,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDirection) {
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable) {
 
-        // 페이지 크기 제한: 10, 30, 50 이외의 값은 10으로 고정
-        if (size != 10 && size != 30 && size != 50) {
-            size = 10;
-        }
+        Page<Product> productPage = (status != null)
+                ? productService.getProductsByStoreIdAndStatus(storeId, status, pageable)
+                : productService.getProductsByStoreId(storeId, pageable);
 
-        // 정렬 방향 처리
-        Sort.Direction direction = Sort.Direction.fromString(sortDirection.toUpperCase());
+        Page<ProductResponseDto> responseDtoPage = productPage.map(productMapper::toProductResponseDto);
+        PagedResponseDto<ProductResponseDto> pagedResponseDto = new PagedResponseDto<>(responseDtoPage);
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-
-        Page<Product> productPage;
-
-        if (status != null) {
-            productPage = productService.getProductsByStoreIdAndStatus(storeId, status, pageable);
-        } else {
-            productPage = productService.getProductsByStoreId(storeId, pageable);
-        }
-
-        Page<ProductResponseDto> responseDtos = productPage.map(productMapper::toProductResponseDto);
-
-        return ResponseEntity.ok(ResponseUtil.createSuccessResponse(responseDtos));
+        return ResponseEntity.ok(ResponseUtil.createSuccessResponse(pagedResponseDto));
     }
 
     @Secured({UserRole.Authority.ADMIN, UserRole.Authority.OWNER})

@@ -33,7 +33,7 @@ public class OrderProduct extends BaseEntity {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @Column(name = "quantity", nullable = false)
+    @Column(nullable = false)
     private Integer quantity;
 
     @Builder
@@ -43,12 +43,12 @@ public class OrderProduct extends BaseEntity {
         this.quantity = Objects.requireNonNull(quantity, "Quantity must not be null");
     }
 
+    public void setOrder(Order order) {
+        this.order = order;
+    }
+
     public void updateQuantity(Integer quantity) {
         this.quantity = quantity;
     }
 
-    public void setOrder(Order order) {
-        this.order = Objects.requireNonNull(order, "Order must not be null");
-        order.getOrderProducts().add(this);
-    }
 }

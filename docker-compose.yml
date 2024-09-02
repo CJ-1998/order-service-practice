@@ -10,3 +10,9 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: password
       POSTGRES_DB: order
+
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
