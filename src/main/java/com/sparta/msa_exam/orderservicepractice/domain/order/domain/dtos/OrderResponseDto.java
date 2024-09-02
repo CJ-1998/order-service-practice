@@ -6,6 +6,7 @@ import com.sparta.msa_exam.orderservicepractice.domain.order.domain.enums.OrderC
 import com.sparta.msa_exam.orderservicepractice.domain.order.domain.enums.OrderStatus;
 import com.sparta.msa_exam.orderservicepractice.domain.order_product.domain.dtos.OrderProductResponseDto;
 import com.sparta.msa_exam.orderservicepractice.domain.payment.domain.enums.PaymentStatus;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
@@ -21,6 +22,9 @@ public class OrderResponseDto {
 
     @JsonProperty("storeId")
     private UUID storeId;
+
+    @JsonProperty("storeName")
+    private String storeName;
 
     @JsonProperty("userId")
     private Long userId;
@@ -46,12 +50,16 @@ public class OrderResponseDto {
     @JsonProperty("orderProducts")
     private List<OrderProductResponseDto> orderProducts;
 
+    @JsonProperty("createdAt")
+    private LocalDateTime createdAt;
+
     @Builder
-    public OrderResponseDto(UUID orderId, UUID storeId, Long userId, String orderAddress, String orderRequest,
+    public OrderResponseDto(UUID orderId, UUID storeId, String storeName, Long userId, String orderAddress, String orderRequest,
                             OrderStatus orderStatus, PaymentStatus paymentStatus, OrderCategory orderCategory,
-                            Integer totalPrice, List<OrderProductResponseDto> orderProducts) {
+                            Integer totalPrice, List<OrderProductResponseDto> orderProducts, LocalDateTime createdAt) {
         this.orderId = orderId;
         this.storeId = storeId;
+        this.storeName = storeName;
         this.userId = userId;
         this.orderAddress = orderAddress;
         this.orderRequest = orderRequest;
@@ -60,5 +68,6 @@ public class OrderResponseDto {
         this.orderCategory = orderCategory;
         this.totalPrice = totalPrice;
         this.orderProducts = orderProducts;
+        this.createdAt = createdAt;
     }
 }

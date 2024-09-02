@@ -14,6 +14,7 @@ public class OrderMapper {
         return OrderResponseDto.builder()
                 .orderId(order.getId())
                 .storeId(order.getStore().getId())
+                .storeName(order.getStore().getName())
                 .userId(order.getUser().getId())
                 .orderAddress(order.getOrderAddress())
                 .orderRequest(order.getOrderRequest())
@@ -24,6 +25,7 @@ public class OrderMapper {
                 .orderProducts(order.getOrderProducts().stream()
                         .map(this::toOrderProductResponseDto)
                         .collect(Collectors.toList()))
+                .createdAt(order.getCreatedAt())
                 .build();
     }
 
