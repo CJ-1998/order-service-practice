@@ -62,6 +62,14 @@ public class JwtUtil {
                         .compact();
     }
 
+    // JWT를 Authorization 헤더에 추가
+    public void addJwtToHeader(String token, HttpServletResponse res) {
+        if (!token.startsWith(BEARER_PREFIX)) {
+            token = BEARER_PREFIX + token;
+        }
+        res.setHeader(AUTHORIZATION_HEADER, token);
+    }
+
     // JWT Cookie 에 저장
     public void addJwtToCookie(String token, HttpServletResponse res) {
         try {
@@ -90,7 +98,7 @@ public class JwtUtil {
     // JWT 토큰 substring
     public String substringToken(String tokenValue) {
         if (StringUtils.hasText(tokenValue) && tokenValue.startsWith(BEARER_PREFIX)) {
-            return tokenValue.substring(7);
+            return tokenValue.substring(BEARER_PREFIX.length());
         }
         log.error("Not Found Token");
         throw new NullPointerException("Not Found Token");
@@ -118,22 +126,39 @@ public class JwtUtil {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 
-    // HttpServletRequest 에서 Cookie Value : JWT 가져오기
+    // HttpServletRequest 에서 Authorization 헤더의 JWT 가져오기
     public String getTokenFromRequest(HttpServletRequest req) {
-        Cookie[] cookies = req.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals(AUTHORIZATION_HEADER)) {
-                    try {
-                        return URLDecoder.decode(cookie.getValue(), "UTF-8"); // Encode 되어 넘어간 Value 다시 Decode
-                    } catch (UnsupportedEncodingException e) {
-                        log.error("Unsupported Encoding, 지원되지 않는 인코딩 입니다.");
-                        return null;
-                    }
-                }
-            }
+        // Authorization 헤더에서 JWT 가져오기
+        String bearerToken = req.getHeader(AUTHORIZATION_HEADER);
+
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
+            return bearerToken.substring(7); // "Bearer " 접두사 제거
         }
-        log.error("No Cookie, JWT를 가진 쿠키가 없습니다.");
+
+        log.error("No JWT token found in request headers");
         return null;
     }
+
+    // HttpServletRequest 에서 Cookie Value : JWT 가져오기
+//    public String getTokenFromRequest(HttpServletRequest req) {
+//        Cookie[] cookies = req.getCookies();
+//        if (cookies != null) {
+//            for (Cookie cookie : cookies) {
+//                if (cookie.getName().equals(AUTHORIZATION_HEADER)) {
+//
+//                    log.info(cookie.getName());
+//                    log.info(cookie.getValue());
+//
+//                    try {
+//                        return URLDecoder.decode(cookie.getValue(), "UTF-8"); // Encode 되어 넘어간 Value 다시 Decode
+//                    } catch (UnsupportedEncodingException e) {
+//                        log.error("Unsupported Encoding, 지원되지 않는 인코딩 입니다.");
+//                        return null;
+//                    }
+//                }
+//            }
+//        }
+//        log.error("No Cookie, JWT를 가진 쿠키가 없습니다.");
+//        return null;
+//    }
 }
