@@ -1,4 +1,5 @@
 # 🚀 AI 검증 비즈니스 프로젝트
+
 <br>
 
 ## 📝 프로젝트 설명
@@ -8,7 +9,12 @@
 <br>
 
 ## 📣 배포 주소
-https://delivery-client.vercel.app/
+
+[https://delivery-client.vercel.app/](https://delivery-client.vercel.app/)
+
+#### Test Credentials:
+- **ID:** `test1`
+- **Password:** `1111`
 
 <br>
 
@@ -73,7 +79,7 @@ jwt:
 ## 🗂️ ERD
 ![image](https://file.notion.so/f/f/83c75a39-3aba-4ba4-a792-7aefe4b07895/8a4212f4-d85a-4673-b850-a7a4e7f06328/%EC%8A%A4%ED%94%84%EB%A7%81%EC%8B%AC%ED%99%94_AI_%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8_.png?table=block&id=ff527a9a-76aa-40e7-80d5-f51fecb7d58c&spaceId=83c75a39-3aba-4ba4-a792-7aefe4b07895&expirationTimestamp=1725285600000&signature=8x65sfoa21lQ_08WWkkUyH91Ns7wQQehzF07Fl94SPw&downloadName=%EC%8A%A4%ED%94%84%EB%A7%81%EC%8B%AC%ED%99%94+AI+%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8+.png)
 
-ERD 주소 : [ERD](https://www.erdcloud.com/d/o8NWFRjC3BCeYtasL)
+**ERD**: [ERD](https://www.erdcloud.com/d/o8NWFRjC3BCeYtasL)
 
 <br>
 
@@ -83,7 +89,7 @@ ERD 주소 : [ERD](https://www.erdcloud.com/d/o8NWFRjC3BCeYtasL)
 <br>
 
 ## 📄 API docs
-API docs 주소 : [API docs](https://www.notion.so/teamsparta/API-0191bf4047484aadbe49e6a5ec30266c)
+**API docs** : [API docs](https://www.notion.so/teamsparta/API-0191bf4047484aadbe49e6a5ec30266c)
 
 <br>
 
