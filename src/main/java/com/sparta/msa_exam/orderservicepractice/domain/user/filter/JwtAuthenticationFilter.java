@@ -55,6 +55,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String token = jwtUtil.createToken(username, role);
         jwtUtil.addJwtToCookie(token, response);
         jwtUtil.addJwtToHeader(token, response);
+
+        // 사용자 정보를 JSON으로 변환하여 response에 추가
+        UserResponseDto userResponseDto = new UserResponseDto(username, role);
+        String userJsonResponse = new ObjectMapper().writeValueAsString(userResponseDto);
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(userJsonResponse);
     }
 
     @Override
@@ -62,5 +70,24 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                               AuthenticationException failed) throws IOException, ServletException {
         log.info("로그인 실패");
         response.setStatus(401);
+    }
+
+    // 사용자 정보를 담을 DTO 클래스
+    public static class UserResponseDto {
+        private String username;
+        private UserRole role;
+
+        public UserResponseDto(String username, UserRole role) {
+            this.username = username;
+            this.role = role;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public UserRole getRole() {
+            return role;
+        }
     }
 }
