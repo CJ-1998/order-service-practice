@@ -54,6 +54,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         String token = jwtUtil.createToken(username, role);
         jwtUtil.addJwtToCookie(token, response);
+        jwtUtil.addJwtToHeader(token, response);
 
         // 사용자 정보를 JSON으로 변환하여 response에 추가
         UserResponseDto userResponseDto = new UserResponseDto(username, role);

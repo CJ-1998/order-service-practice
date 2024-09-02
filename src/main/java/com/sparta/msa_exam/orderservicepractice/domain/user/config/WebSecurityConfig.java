@@ -55,7 +55,10 @@ public class WebSecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // CORS 허용할 Origin 설정 (클라이언트의 도메인)
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+                "http://localhost:3000",
+                "https://delivery-client.vercel.app"
+        ));
 
         // HTTP 메서드 허용 설정
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
