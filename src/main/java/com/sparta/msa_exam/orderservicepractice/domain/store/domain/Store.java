@@ -42,7 +42,7 @@ public class Store extends BaseEntity {
 
     private StoreStatus status;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "region_id")
     private Region region;
 
