@@ -84,7 +84,7 @@ jwt:
 <br>
 
 ## 💻 기술 스택
-![image](https://file.notion.so/f/f/83c75a39-3aba-4ba4-a792-7aefe4b07895/3f3c3f0d-c179-48ff-b273-eed237c324dc/image.png?table=block&id=136ecc3c-bc44-4921-aba5-8bdf0919aa52&spaceId=83c75a39-3aba-4ba4-a792-7aefe4b07895&expirationTimestamp=1725292800000&signature=sBfrz5btucQAYZPjEp9xLXqOuiI3JScKbisCmj2RJZ0&downloadName=image.png)
+![image](https://file.notion.so/f/f/83c75a39-3aba-4ba4-a792-7aefe4b07895/63a78dc2-8aff-4802-b115-c630fab637b2/image.png?table=block&id=d04f8d4a-8411-4525-b14c-010a8d4ae614&spaceId=83c75a39-3aba-4ba4-a792-7aefe4b07895&expirationTimestamp=1725415200000&signature=QtHxmWIP1YtKGYtFPHU0eW9IPlr42wohuPBYPMPRP3s&downloadName=image.png)
 
 <br>
 
